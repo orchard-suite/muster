@@ -77,6 +77,33 @@ func TestEachFolderServiceWearsItsOwnDescription(t *testing.T) {
 	}
 }
 
+func TestAnArchivedRepositoryRetiresEveryServiceItBuilds(t *testing.T) {
+	repo := &provider.Repo{Provider: provider.GitLab, FullName: "acme/envs", Archived: true}
+	found := &services.Found{
+		Services: []services.Service{{ID: "prod", Path: "prod", Name: "prod"}, {ID: "tools", Path: "tools", Name: "tools"}},
+		Descriptions: []services.Description{{Descriptor: services.Descriptor{Service: "gitlab/acme/envs/prod",
+			Fields: map[string]any{"lifecycle": "production", "category": "Landing zone"}}, File: "prod/orrery.yaml", Path: "prod"}},
+	}
+	svcs, bare := ServiceEntities(repo, found, nil)
+	if len(svcs) != 2 || len(bare) != 1 {
+		t.Fatalf("services = %+v, bare = %+v", svcs, bare)
+	}
+	for _, e := range append(svcs, bare["gitlab/acme/envs/prod"]) {
+		if e.Fields["lifecycle"] != "retired" {
+			t.Errorf("%s: lifecycle = %v, want retired over what its file or a person says", e.Key, e.Fields["lifecycle"])
+		}
+	}
+
+	repo.Archived = false
+	svcs, _ = ServiceEntities(repo, found, nil)
+	if svcs[0].Fields["lifecycle"] != "production" {
+		t.Errorf("a live repository's file names the lifecycle: %v", svcs[0].Fields["lifecycle"])
+	}
+	if _, ok := svcs[1].Fields["lifecycle"]; ok {
+		t.Errorf("a live repository writes no lifecycle of its own, so a person's stands: %v", svcs[1].Fields["lifecycle"])
+	}
+}
+
 func TestConnectionsAreKeyedByServiceEnvironmentAndHost(t *testing.T) {
 	repo := &provider.Repo{Provider: provider.GitHub, FullName: "Acme/Shop"}
 	found := &services.Found{Services: []services.Service{{ID: "src/Api", Name: "Api"}}, Connections: []services.Connection{

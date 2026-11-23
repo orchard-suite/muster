@@ -175,8 +175,22 @@ func ServiceEntities(r *provider.Repo, found *services.Found, icons map[string]s
 		describe(&e, d, icons, bare)
 		out = append(out, e)
 	}
+	if r.Archived {
+		for i := range out {
+			out[i].Fields["lifecycle"] = Retired
+		}
+		for k, b := range bare {
+			b.Fields["lifecycle"] = Retired
+			bare[k] = b
+		}
+	}
 	return out, bare
 }
+
+// Retired is the lifecycle of every service an archived repository builds.
+// It is pushed over what an orrery.yaml or a person says, and only while the
+// repository stays archived: a live one writes no lifecycle of its own.
+const Retired = "retired"
 
 // describe puts what an orrery.yaml says on its service: its logo, the APIs
 // it calls, and its place. An empty list is written as one, so a connector

@@ -310,6 +310,8 @@ func ServiceBlueprint() sdk.Blueprint {
 			f("path", typed("string", "description", "Where it sits in its repository, empty for one that is the whole repository.")),
 			f("type", typed("enum", "values", []string{"backend", "frontend", "library", "infrastructure", "tool", "docs", "other"}, "description", "What kind of thing it is, read from the files that build it.")),
 			f("language", typed("enum", "values", services.Languages, "sticky", true, "description", "What it is written in, read from the files that build it. A person who knows better changes it, and that change stays.")),
+			f("lifecycle", typed("enum", "values", []string{"planned", "active", "retiring", Retired}, "description", "Where it stands in its life. A person or its orrery.yaml sets it; muster writes retired while its repository is archived.")),
+			f("archived", typed("boolean", "mirror", "repository.archived", "description", "Its repository is archived, so it is retired.")),
 			f("last_changed_at", typed("datetime", "title", "Last changed", "description", "When the newest commit on the default branch touched its folder.")),
 			f("last_changed_by", typed("string", "title", "Last changed by")),
 			f("last_changed_by_email", typed("string", "title", "Last changed by email")),

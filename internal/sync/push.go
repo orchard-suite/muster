@@ -120,6 +120,11 @@ func (e *Engine) entities(ctx context.Context, key string, now time.Time) (writt
 	}
 	if t.found != nil {
 		out.services, out.bare = catalog.ServiceEntities(r, t.found, e.logos(ctx, r, t.found))
+		if r.Archived {
+			e.o.Log.DebugContext(ctx, "repository archived; its services written retired", "repo", r.FullName, "services", len(out.services))
+		} else {
+			e.o.Log.DebugContext(ctx, "repository live; its services keep their own lifecycle", "repo", r.FullName, "services", len(out.services))
+		}
 		out.apis = catalog.APIEntities(r, t.found)
 		out.connections = catalog.ConnectionEntities(r, t.found)
 	}
