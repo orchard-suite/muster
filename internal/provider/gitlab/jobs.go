@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
 // jobsRead is how many of a project's newest jobs each sync reads. A sync

@@ -12,11 +12,11 @@ import (
 	gosync "sync"
 	"time"
 
+	"github.com/orchard-suite/muster/internal/catalog"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/state"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/catalog"
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/state"
 )
 
 // offer brings the blueprints once per start. A blueprint the hub refuses is

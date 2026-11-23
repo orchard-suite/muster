@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 	_ "modernc.org/sqlite"
 )
 
@@ -91,7 +91,7 @@ func gitlabFromStore(w io.Writer, s *oldStore) error {
 		RefreshToken string `json:"refreshToken"`
 	}
 	if err := s.setting("gitlab.token", &token); err != nil {
-		return fmt.Errorf("%w: authorize again with redgreen setup gitlab", err)
+		return fmt.Errorf("%w: authorize again with muster setup gitlab", err)
 	}
 	refresh, err := s.open("refresh token", token.RefreshToken)
 	if err != nil {

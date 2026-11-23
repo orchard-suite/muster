@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/state"
+	"github.com/orchard-suite/muster/internal/state"
 )
 
 // hub answers list reads from canned entities by blueprint, and keeps every
@@ -239,7 +239,7 @@ func TestReportedAsksForDeploymentsThatNameAJobAndAreNoSync(t *testing.T) {
 	}
 }
 
-func TestHandOverGivesAJobToTheSourceThatReportsItAndDropsRedgreensCopy(t *testing.T) {
+func TestHandOverGivesAJobToTheSourceThatReportsItAndDropsMustersCopy(t *testing.T) {
 	report := func(key, owner, url string) HubReport {
 		var r HubReport
 		r.Key, r.Owner, r.Fields.URL = key, owner, url
@@ -249,9 +249,9 @@ func TestHandOverGivesAJobToTheSourceThatReportsItAndDropsRedgreensCopy(t *testi
 	own := map[string]bool{"gitlab/cloud/app/12": true}
 	got := HandOver([]HubReport{
 		report("cloud/app/api/7", "ci", job7),
-		// Written before redgreen kept track: its own, by owner, though not among the keys it holds now.
-		report("gitlab/cloud/app/11", "redgreen", job7),
-		report("gitlab/cloud/app/12", "redgreen", job8),
+		// Written before Muster kept track: its own, by owner, though not among the keys it holds now.
+		report("gitlab/cloud/app/11", "muster", job7),
+		report("gitlab/cloud/app/12", "muster", job8),
 		report("cloud/app/web/9", "ci", job9),
 		report("cloud/app/web/10", "ci", ""),
 	}, func(k string) bool { return own[k] })
@@ -259,9 +259,9 @@ func TestHandOverGivesAJobToTheSourceThatReportsItAndDropsRedgreensCopy(t *testi
 		t.Fatalf("elsewhere %v", got.Elsewhere)
 	}
 	if len(got.Copies) != 1 || got.Copies[0] != "gitlab/cloud/app/11" {
-		t.Fatalf("copies %v; a job redgreen alone reports stays its own", got.Copies)
+		t.Fatalf("copies %v; a job muster alone reports stays its own", got.Copies)
 	}
 	if none := HandOver([]HubReport{report("cloud/app/api/7", "ci", job7)}, func(string) bool { return false }); len(none.Elsewhere) != 0 || len(none.Copies) != 0 {
-		t.Fatalf("handed over %+v before redgreen holds anything", none)
+		t.Fatalf("handed over %+v before muster holds anything", none)
 	}
 }

@@ -5,5 +5,5 @@ logs/
 .env.*
 CLAUDE.md
 .claude/
-/redgreen
+/muster
 blueprints.check.json

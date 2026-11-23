@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
 // A store the old web app left, with its settings sealed the way it sealed them.

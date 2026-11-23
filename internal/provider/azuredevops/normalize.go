@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
 	"gopkg.in/yaml.v3"
 )
 

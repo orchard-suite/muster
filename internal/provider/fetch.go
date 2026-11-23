@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/state"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
+	"github.com/orchard-suite/muster/internal/state"
+	"github.com/orchard-suite/muster/internal/telemetry"
 )
 
 // HTTPError is any answer that is not usable. Status lets a caller read 403
@@ -217,7 +217,7 @@ func (f *Fetcher) Send(ctx context.Context, method, url string, body any, out an
 }
 
 func (f *Fetcher) authorize(ctx context.Context, req *http.Request) error {
-	req.Header.Set("User-Agent", "redgreen")
+	req.Header.Set("User-Agent", "muster")
 	if f.Auth == nil {
 		return nil
 	}

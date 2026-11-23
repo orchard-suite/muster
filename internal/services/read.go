@@ -196,7 +196,7 @@ func (f *Found) describe(ctx context.Context, files Files, paths []string, repoK
 }
 
 // unusable are the problems of the files that could not be used, where each
-// was meant for redgreen: at the root, beside a service, or naming one. Other
+// was meant for Muster: at the root, beside a service, or naming one. Other
 // tools name their own files orrery.yaml too.
 func (f *Found) unusable(files []unused) []string {
 	var out []string

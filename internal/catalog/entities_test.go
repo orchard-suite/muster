@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
 )
 
 func TestTheDescribedServiceCarriesItsFile(t *testing.T) {

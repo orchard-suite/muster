@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
 // Target is a service a deployment of its repository may roll out.
@@ -273,13 +273,13 @@ func lastOther(succeeded []Record, group []Record) string {
 // Places is what places an Argo CD app's syncs in a repository and on one
 // of its services.
 type Places struct {
-	// Linked are the links the operator who runs redgreen declares in its
+	// Linked are the links the operator who runs Muster declares in its
 	// own settings (ARGOCD_SERVICES): an app by its key or name, or a source.
 	Linked []Declared
 	// Declared are the Argo CD sources services name in their orrery.yaml.
 	Declared []Declared
 	// Targets are a tracked repository's services, by its key; nil for a
-	// repository redgreen does not watch.
+	// repository Muster does not watch.
 	Targets func(repoKey string) []Target
 }
 
@@ -314,7 +314,7 @@ type Conflict struct {
 }
 
 // MapSyncs turns the hub's Argo CD syncs into records of the repositories
-// redgreen watches, each placed from the strongest signal there is:
+// Muster watches, each placed from the strongest signal there is:
 //
 //  1. Someone says which service the app deploys. The operator's link names
 //     the app, by key, then by name, or the source its manifests are read

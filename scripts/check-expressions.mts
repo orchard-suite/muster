@@ -1,4 +1,4 @@
-// Proves redgreen's blueprints with Orrery's own code: every blueprint passes
+// Proves muster's blueprints with Orrery's own code: every blueprint passes
 // the hub's schema, every calculation compiles, and the health rules and DORA
 // fields give the expected answers on sample entities, with aggregations run
 // through the hub's aggregate() and calculations in field order, as the hub

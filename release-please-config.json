@@ -10,7 +10,7 @@
   "scopes": [],
   "packages": {
     ".": {
-      "component": "redgreen",
+      "component": "muster",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         {

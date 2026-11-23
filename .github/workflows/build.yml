@@ -1,7 +1,7 @@
 name: Build
 
 # The release workflow calls this with the new tag. It publishes the image, tagged with the version, to
-# ghcr.io/orchard-suite/redgreen. The GitHub Container Registry package is public, so a cluster pulls it without a
+# ghcr.io/orchard-suite/muster. The GitHub Container Registry package is public, so a cluster pulls it without a
 # secret; pin it by digest. The image is signed with cosign keyless as this workflow's GitHub identity, with a
 # syft SBOM attested to it.
 # The tag must match the version in VERSION; that file is the source of truth.
@@ -19,7 +19,7 @@ on:
 
 env:
   GHCR: ghcr.io/orchard-suite
-  IMAGE: redgreen
+  IMAGE: muster
 
 permissions:
   contents: read

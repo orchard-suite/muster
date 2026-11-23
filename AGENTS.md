@@ -1,4 +1,4 @@
-# redgreen
+# Muster
 
 The forges' door into Orrery. Read `README.md` first.
 
@@ -8,15 +8,15 @@ https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
 
 ## Shape
 
-- A headless Go service. Orrery is the board and the math; redgreen watches
+- A headless Go service. Orrery is the board and the math; Muster watches
   the forges and writes facts. It never stores what Orrery stores and never
   computes what Orrery can compute when a page is read.
-- `cmd/redgreen` is the command: `serve`, `setup github`, `setup gitlab`, and
+- `cmd/muster` is the command: `serve`, `setup github`, `setup gitlab`, and
   `import-history`. Nothing else lives there but wiring.
 - `internal/provider` is the neutral model (`model.go`) and the `Provider`
   interface. One package per forge under it (`github`, `gitlab`,
   `azuredevops`). Nothing outside a forge's package knows its JSON. Adding a
-  forge means adding a package and listing it in `cmd/redgreen/serve.go`.
+  forge means adding a package and listing it in `cmd/muster/serve.go`.
 - Every forge read goes through `provider.Get`, the conditional request: it
   sends back the ETag, and a 304 reuses the facts kept from the first answer.
   `provider.Once` is for an answer never asked for again, such as a tree at
@@ -36,7 +36,7 @@ https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
 - `internal/outcomes` works out each deployment's lead time, commit count,
   fix-only flag, failed change, and restore time. Orrery aggregates them per
   service and per team. A forge job another source already reports with its
-  job address (`Reported`, `HandOver`) is that source's deployment: redgreen
+  job address (`Reported`, `HandOver`) is that source's deployment: Muster
   enriches it, deletes every copy the hub holds under its own name, and
   writes none. `attribute.go` is the only place a deployment is placed on a
   service (`Attribute` for forge deployments, `MapSyncs` for Argo CD syncs);
@@ -46,14 +46,14 @@ https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
   service's `deploys.argocd`. A service's repository never names an
   estate's GitOps repository; the operator's setting does. A deployment of several services is
   one record per service, keyed `<key>@<service folder>` past the first; a
-  pipeline deployment is keyed `<service>@run-<id>`. redgreen deletes a key
+  pipeline deployment is keyed `<service>@run-<id>`. Muster deletes a key
   of its own shape that it no longer makes. `orrery.go` reads Argo CD syncs,
   apps, workloads, `it_incident`, and the services an `ARGOCD_SERVICES` link
   may name, back from Orrery with `ORRERY_READ_TOKEN`; a workload's `repo`
   URL, read by `repourl.go`, places a sync or an incident in a repository
   and folder, and an incident's `service` relation places it on that
   service. A link may name a service only the hub holds: its syncs carry no
-  commits, so redgreen never guesses their lead time. Each page of a hub list goes through `provider.Get` like a forge
+  commits, so Muster never guesses their lead time. Each page of a hub list goes through `provider.Get` like a forge
   read, so an unchanged page is a 304. A question must read the same from one
   cycle to the next, or its tag never matches: a time in a filter is asked by
   the day (`since`) and trimmed to the moment in Go.
@@ -70,7 +70,7 @@ https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
 - `internal/sync` is the engine: the sweep, the workers, webhooks, and the
   writes. `internal/services/descriptor.go` reads a repository's
   `orrery.yaml`; it is the only reader of one. An app never writes its own
-  description: redgreen reads its own file from its repository like any
+  description: Muster reads its own file from its repository like any
   other. `connections.go` and `endpoints.go` read the config files beside
   each service and keep host and database names only; no value ever leaves
   them.
@@ -106,7 +106,7 @@ Agents push to main and land with `make land` (`make land BRANCH=<branch>`
 from a worktree): it runs `make check`, then `release-damnit land`. CI runs
 the same check on every pull request and before every release, then
 versions every `feat` and `fix` since the last release tag, tags it, and
-builds the tag's image, `ghcr.io/orchard-suite/redgreen:<version>` for
+builds the tag's image, `ghcr.io/orchard-suite/muster:<version>` for
 `linux/amd64`, signed with cosign. Never edit `VERSION`, the manifest, or
 `CHANGELOG.md` by hand.
 

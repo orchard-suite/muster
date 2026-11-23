@@ -14,14 +14,14 @@ import (
 	gosync "sync"
 	"time"
 
+	"github.com/orchard-suite/muster/internal/catalog"
+	cijobs "github.com/orchard-suite/muster/internal/jobs"
+	"github.com/orchard-suite/muster/internal/outcomes"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/state"
+	"github.com/orchard-suite/muster/internal/telemetry"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/catalog"
-	cijobs "github.com/orchard-suite/redgreen/internal/jobs"
-	"github.com/orchard-suite/redgreen/internal/outcomes"
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/state"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
 	"go.opentelemetry.io/otel/attribute"
 )
 
@@ -157,7 +157,7 @@ func (e *Engine) Sweep(ctx context.Context, reason string) {
 		return
 	}
 	defer e.sweepMu.Unlock()
-	ctx, span := e.o.Tel.Root(ctx, "redgreen.sweep", attribute.String("task", "sweep"), attribute.String("reason", reason))
+	ctx, span := e.o.Tel.Root(ctx, "muster.sweep", attribute.String("task", "sweep"), attribute.String("reason", reason))
 	started := time.Now()
 	e.o.Log.InfoContext(ctx, "sweep started", "reason", reason)
 	complete := true
@@ -263,7 +263,7 @@ func (e *Engine) syncRepo(ctx context.Context, key string) error {
 		return nil
 	}
 	p := e.provider(t.account.Provider)
-	ctx, span := e.o.Tel.Start(ctx, "redgreen.sync", attribute.String("provider", string(p.Kind())))
+	ctx, span := e.o.Tel.Start(ctx, "muster.sync", attribute.String("provider", string(p.Kind())))
 	started := time.Now()
 	repo, err := p.Sync(ctx, t.account, t.ref)
 	e.o.Tel.Synced(ctx, string(p.Kind()), time.Since(started), err)
@@ -537,7 +537,7 @@ func (e *Engine) activeJobs() []telemetry.ActiveJobs {
 
 // refresh reads one repository ahead of the sweep and writes it.
 func (e *Engine) refresh(key string) {
-	ctx, span := e.o.Tel.Root(context.Background(), "redgreen.refresh", attribute.String("task", "webhook"))
+	ctx, span := e.o.Tel.Root(context.Background(), "muster.refresh", attribute.String("task", "webhook"))
 	e.urgent <- job{key: key, done: func(err error) {
 		defer telemetry.End(span, err)
 		e.mu.Lock()

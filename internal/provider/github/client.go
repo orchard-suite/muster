@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
 // API is GitHub's REST root.
@@ -104,7 +104,7 @@ func (a *appAuth) asInstallation(installation string) provider.Auth {
 		}
 		req.Header.Set("Authorization", "Bearer "+jwt)
 		req.Header.Set("Accept", "application/vnd.github+json")
-		req.Header.Set("User-Agent", "redgreen")
+		req.Header.Set("User-Agent", "muster")
 		res, err := a.http.Do(req)
 		if err != nil {
 			return nil, err

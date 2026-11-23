@@ -12,13 +12,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/orchard-suite/muster/internal/catalog"
+	"github.com/orchard-suite/muster/internal/config"
+	"github.com/orchard-suite/muster/internal/outcomes"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/telemetry"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/catalog"
-	"github.com/orchard-suite/redgreen/internal/config"
-	"github.com/orchard-suite/redgreen/internal/outcomes"
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
 )
 
 // oldDeployment is one row of the old store's deployments table, with its repository.

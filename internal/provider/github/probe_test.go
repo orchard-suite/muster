@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/provider/providertest"
-	"github.com/orchard-suite/redgreen/internal/services"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider/providertest"
+	"github.com/orchard-suite/muster/internal/services"
 )
 
 func probeGitHub(t *testing.T, truncated bool, probe []string) ([]string, []string) {

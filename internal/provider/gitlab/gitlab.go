@@ -19,18 +19,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/state"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/state"
+	"github.com/orchard-suite/muster/internal/telemetry"
 )
 
-// Config is how redgreen signs in to GitLab. An OAuth application wins over a token.
+// Config is how Muster signs in to GitLab. An OAuth application wins over a token.
 type Config struct {
 	URL     string
 	Allowed []string
 	// ClientID, ClientSecret, and RefreshToken are an OAuth application and
-	// the refresh token `redgreen setup gitlab` printed. GitLab replaces the
+	// the refresh token `muster setup gitlab` printed. GitLab replaces the
 	// refresh token on every use, so the newest is kept in the state, sealed.
 	ClientID, ClientSecret, RefreshToken string
 	WebhookSecret                        string
@@ -123,12 +123,12 @@ func (p *Provider) client() *provider.Fetcher {
 
 // accessToken is the current access token, refreshed shortly before it
 // expires. A refresh token GitLab no longer takes cannot be retried; the
-// owner runs `redgreen setup gitlab` again.
+// owner runs `muster setup gitlab` again.
 func (p *Provider) accessToken(ctx context.Context) (string, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.broken {
-		return "", errors.New("gitlab authorization dropped; run `redgreen setup gitlab` and set GITLAB_REFRESH_TOKEN")
+		return "", errors.New("gitlab authorization dropped; run `muster setup gitlab` and set GITLAB_REFRESH_TOKEN")
 	}
 	if p.tokens == nil {
 		var sealed Tokens
@@ -145,7 +145,7 @@ func (p *Provider) accessToken(ctx context.Context) (string, error) {
 		if p.tokens == nil {
 			if p.cfg.RefreshToken == "" {
 				p.broken = true
-				return "", errors.New("gitlab oauth needs GITLAB_REFRESH_TOKEN from `redgreen setup gitlab`")
+				return "", errors.New("gitlab oauth needs GITLAB_REFRESH_TOKEN from `muster setup gitlab`")
 			}
 			p.tokens = &Tokens{RefreshToken: p.cfg.RefreshToken}
 		}
@@ -197,7 +197,7 @@ func Exchange(ctx context.Context, client *http.Client, base string, form url.Va
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "redgreen")
+	req.Header.Set("User-Agent", "muster")
 	res, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -575,7 +575,7 @@ func (x *files) Commits(ctx context.Context, path string) ([]services.Commit, er
 	return out, nil
 }
 
-// Webhook accepts a project or group webhook a person pointed at redgreen,
+// Webhook accepts a project or group webhook a person pointed at Muster,
 // checked by its secret token.
 func (p *Provider) Webhook(_ context.Context, h http.Header, body []byte) (provider.Delivery, error) {
 	secret := p.cfg.WebhookSecret

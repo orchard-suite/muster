@@ -21,7 +21,7 @@ jobs:
         with:
           go-version-file: go.mod
       # The expression check runs against the Orrery commit go.mod requires,
-      # so the calculations are proved by the code redgreen builds against.
+      # so the calculations are proved by the code muster builds against.
       - name: Check out Orrery at the version go.mod requires
         run: |
           version=$(go list -m -f '{{.Version}}' github.com/orchard-suite/orrery/v2)

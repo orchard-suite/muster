@@ -1,4 +1,4 @@
-// Package telemetry holds redgreen's logs, traces, and metrics. Logs are one
+// Package telemetry holds Muster's logs, traces, and metrics. Logs are one
 // JSON object per line on stdout. Traces and metrics go over OTLP/HTTP when
 // OTEL_EXPORTER_OTLP_ENDPOINT is set; without it the instruments are no-ops,
 // so the code that measures never asks whether telemetry is on.

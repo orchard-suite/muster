@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
 const (

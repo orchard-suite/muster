@@ -2,7 +2,7 @@ package catalog
 
 import "strings"
 
-// Every calculation redgreen offers, in Orrery's expression language. They
+// Every calculation Muster offers, in Orrery's expression language. They
 // live here and nowhere else, so scripts/check-expressions.mts can compile and
 // evaluate each one with Orrery's own compiler.
 //
@@ -19,7 +19,7 @@ type Rule struct {
 	Severity string
 	Title    string
 	Help     string
-	// Calculation computes the field in Orrery; empty when redgreen pushes it.
+	// Calculation computes the field in Orrery; empty when Muster pushes it.
 	Calculation string
 }
 
@@ -102,7 +102,7 @@ type Calculation struct {
 	Blueprint, Field, Source string
 }
 
-// Calculations lists every calculation redgreen offers, in the order each
+// Calculations lists every calculation Muster offers, in the order each
 // blueprint offers them.
 func Calculations() []Calculation {
 	var out []Calculation

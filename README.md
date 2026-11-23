@@ -1,13 +1,13 @@
-# redgreen
+# Muster
 
-redgreen watches GitHub, GitLab, and Azure DevOps and writes what it finds
+Muster watches GitHub, GitLab, and Azure DevOps and writes what it finds
 into an [Orrery](https://github.com/orchard-suite/orrery) catalog: repositories,
 pipelines, services, deployments, and issues. Orrery is the board and the
 math. Health and the four DORA measures are calculations and aggregations in
-the blueprints redgreen offers, so Orrery works them out when a page is read,
+the blueprints Muster offers, so Orrery works them out when a page is read,
 and changing a rule never needs a resync.
 
-redgreen has no web interface. It is one Go binary with a small SQLite state
+Muster has no web interface. It is one Go binary with a small SQLite state
 that can be rebuilt by one sweep.
 
 ## What it writes
@@ -18,7 +18,7 @@ that can be rebuilt by one sweep.
 | `sw_pipeline` | inventory | one per workflow, build definition, or schedule: the latest default-branch run, schedule state, newest release build, 30-day success rate, median duration, a 60-day success trend, and a flaky flag. Runs stay on the forge. |
 | `sw_service` | inventory | each service found from the files that build it (folder, kind, language, icon, last human change, README, Dockerfile, tests), and its DORA measures. The one a repository's `orrery.yaml` describes also carries its logo, the APIs it calls (`consumes`, `will_consume`), and the fields and relations that place it in the estate's scheme. |
 | `sw_api` | inventory | each API a repository's `orrery.yaml` says its service provides: kind, description, and where its definition is read |
-| `sw_deployment` | history, kept 180 days | each deployment a forge recorded, one per service it rolled out, and each one a service's pipeline made where its orrery.yaml says so, with lead time, commits carried, fix only, failed change, and restore time. Argo CD syncs another source writes get the same fields and their service added, and so does a forge job another source already reports by its address: that source's entity is the deployment, and redgreen keeps no copy of its own. |
+| `sw_deployment` | history, kept 180 days | each deployment a forge recorded, one per service it rolled out, and each one a service's pipeline made where its orrery.yaml says so, with lead time, commits carried, fix only, failed change, and restore time. Argo CD syncs another source writes get the same fields and their service added, and so does a forge job another source already reports by its address: that source's entity is the deployment, and Muster keeps no copy of its own. |
 | `sw_issue` | record, kept 90 days after closing | open issues and pull requests on every forge, linked to their repository |
 | `sw_connection` | inventory | each host a service's config files name, per environment: host, resource name, database, kind, and the setting names, with evidence `code`. Names only, never a value. |
 | `team` | fields only | the same DORA measures over a team's services, through the standard's `sw_service.team` |
@@ -29,11 +29,11 @@ A repository describes the service it builds in an `orrery.yaml`: at its
 root, or beside the service in a repository that builds several. It holds
 the service's key, its logo, the APIs it provides and calls, and, for one
 estate, its place in that estate's scheme; paths in it are from the
-repository root. redgreen reads the files with the services, at the same
+repository root. Muster reads the files with the services, at the same
 commit, so an estate lists exactly the services of the repositories it
 reads, and nothing it does not. The key must be the repository's own, or a
 folder in it; a file in a folder names a service at or under that folder.
-redgreen reads every `orrery.yaml` in the tree, outside vendored and build
+Muster reads every `orrery.yaml` in the tree, outside vendored and build
 output folders. A folder a file names is a service of its own: the build
 files in it are read as if it were a repository, and the one service they
 find there is that folder's. Several found there stand under it. A folder a
@@ -43,7 +43,7 @@ folders, and makes no catch-all service at its root when they hold the
 services. A file without a `service` key, in a folder that is no service,
 belongs to another tool and is left alone. The place (`fields` and `relations`) is the estate's own
 words: it travels on the service in every write, push and sweep alike,
-because each write replaces what redgreen wrote before. Where the hub lacks
+because each write replaces what Muster wrote before. Where the hub lacks
 one of its names, the service is written again without its place and stands
 without it. A file that cannot be used is logged and left
 out; the services still stand.
@@ -87,7 +87,7 @@ A service's repository cannot always name the apps that deploy it. A tool
 someone else wrote, or one whose source lives on another forge, may run
 from the estate's own GitOps repository, and naming that repository in the
 tool's source would tie the tool to one estate. The operator who runs
-redgreen links those apps to their services in redgreen's own settings
+Muster links those apps to their services in Muster's own settings
 instead, with `ARGOCD_SERVICES`: pairs of `<argocd app or source>=<service
 key>`, split by commas or line breaks.
 
@@ -105,17 +105,17 @@ ARGOCD_SERVICES=
   `deploys.argocd`. It names every app read from that folder or under it;
   the longest source wins, and two links of the same source to different
   services place neither. A link naming the app beats a source.
-- The service key is any service the hub holds: one redgreen found in a
+- The service key is any service the hub holds: one Muster found in a
   repository it watches, or one another source wrote. A service no watched
   repository holds gets its syncs with their status, time, revision, and
   failed change, from the sync's status and the incidents on the service.
-  redgreen reads no commits for it, so its syncs count for deploy frequency
+  Muster reads no commits for it, so its syncs count for deploy frequency
   and change failure rate, and its lead time, commit counts, fix-only flags,
   and the restores a fix would give stay empty. One info line per pass names
   those services. A link to a service the hub does not hold, or one naming
   no app the hub holds, is logged as a warning on every pass and places
   nothing. It never stops a sweep. A pair it cannot read, or one app or source linked to two
-  services, stops redgreen at start, like any setting it cannot use.
+  services, stops Muster at start, like any setting it cannot use.
 - A link ranks with `deploys.argocd`, ahead of the workload and the folder.
   Where the two place one app on different services, the link wins and the
   conflict is logged: the operator runs the estate, and a service's file is
@@ -123,7 +123,7 @@ ARGOCD_SERVICES=
 
 ### What a service's config files say it reaches
 
-redgreen reads the config files in each service's own folder, at the same
+Muster reads the config files in each service's own folder, at the same
 commit as the services: `appsettings*.json`, `local.settings.json`,
 `web*.config` with its transforms (`Web.Prod.config`),
 `ApplicationInsights.config`, and `*.env.example`. It reads connection
@@ -139,7 +139,7 @@ Test, Dev, Preprod, Uat, or Qa, written as `Prod`, `Staging`, `Test`, `Dev`,
 or `Web.config`, is `unknown`. Each record is keyed
 `<service key>@<environment>><host>[/<database>]@code` and linked to its
 service; the estate's hub links the environment, the app, and the resource
-by its own rules. redgreen offers `sw_connection` with only the fields it
+by its own rules. Muster offers `sw_connection` with only the fields it
 writes, each as an estate defines it, so a hub that already has the
 blueprint gains nothing from the offer. A config file that cannot be parsed
 is logged and left out.
@@ -171,7 +171,7 @@ one in 5 nights. Evidence older than 180 days is dropped, so a pipeline that
 runs a few times a year is not held amber by one bad day for years; without
 that bound it would wait more than a year for 5 runs. `FLAKY_WINDOW_RUNS`,
 `FLAKY_CLEAR_RUNS`, and `FLAKY_MAX_AGE_DAYS` change the three numbers. A
-forge lists at most 30 runs of a pipeline and redgreen keeps runs for 60
+forge lists at most 30 runs of a pipeline and Muster keeps runs for 60
 days, so a wider window reaches no further for a pipeline that runs seldom.
 
 A repository's status is the worst of its own rules and its pipelines'
@@ -187,7 +187,7 @@ On `sw_service` and `team`, over the deployments of the last 30 days and the
 time to restore (median of `restore_hours`), each with a band (elite, high,
 medium, low) and `dora_grade`, the worst band.
 
-redgreen works out per deployment only what needs a forge call or the
+Muster works out per deployment only what needs a forge call or the
 deployments around it:
 
 - `lead_time_hours`: the median hours from each carried commit's authoring to
@@ -248,7 +248,7 @@ deployments are not read.
 ## Running it
 
 ```bash
-redgreen serve
+muster serve
 ```
 
 | Variable | What it does |
@@ -261,7 +261,7 @@ redgreen serve
 | `BOT_AUTHORS` | More commit authors that count as automation, comma separated. |
 | `DEPLOY_COMPONENT_FIELDS` | The orrery.yaml `fields` whose value names a service in its deployments' environments and job names, comma separated: `deploy_component`. |
 | `ARGOCD_SERVICES` | The operator's links from an Argo CD app, by key or name, or from a source, to the service it deploys: `<argocd app or source>=<service key>` pairs, split by commas or line breaks. See "How an operator says what an Argo CD app deploys". |
-| `PROBE_PATHS` | Files or folders to look for in every repository, from its root, comma separated: `docs/notes,docs/guides`. Each repository's `paths_present` lists the ones its default branch holds, empty when it holds none, and stays unset when this is empty. It reads the file tree redgreen already lists for services, so it costs no extra calls. A tree GitHub cuts short leaves `paths_present` unset, since a missing path may still be there. |
+| `PROBE_PATHS` | Files or folders to look for in every repository, from its root, comma separated: `docs/notes,docs/guides`. Each repository's `paths_present` lists the ones its default branch holds, empty when it holds none, and stays unset when this is empty. It reads the file tree Muster already lists for services, so it costs no extra calls. A tree GitHub cuts short leaves `paths_present` unset, since a missing path may still be there. |
 | `FLAKY_WINDOW_RUNS`, `FLAKY_CLEAR_RUNS`, `FLAKY_MAX_AGE_DAYS` | The flaky rule: finished runs read, 20; passes in a row that clear it, 5; days evidence counts, 180. |
 | `ORRERY_URL` | The hub's machine surface. |
 | `ORRERY_TOKEN` | A source token, registered for the blueprints above, with a delete grant on `sw_deployment` so it can remove its copy of a job another source reports. |
@@ -272,7 +272,7 @@ redgreen serve
 | `GITHUB_ALLOWED_ACCOUNTS` | Logins whose installations sync. Anyone else's is logged and left alone. |
 | `GITHUB_TOKEN`, `GITHUB_TOKEN_ACCOUNTS` | A personal token instead, for a local run. No webhooks. |
 | `GITLAB_URL` | The GitLab instance, `https://gitlab.com`. |
-| `GITLAB_CLIENT_ID`, `GITLAB_CLIENT_SECRET`, `GITLAB_REFRESH_TOKEN` | The OAuth application and the refresh token `redgreen setup gitlab` printed. |
+| `GITLAB_CLIENT_ID`, `GITLAB_CLIENT_SECRET`, `GITLAB_REFRESH_TOKEN` | The OAuth application and the refresh token `muster setup gitlab` printed. |
 | `GITLAB_ALLOWED_ACCOUNTS` | Group and user paths that sync. |
 | `GITLAB_WEBHOOK_SECRET` | The secret token GitLab webhooks carry. |
 | `GITLAB_TOKEN`, `GITLAB_TOKEN_ACCOUNTS` | An access token instead, and the namespaces it reads. |
@@ -289,7 +289,7 @@ redgreen serve
 A webhook reads its repository again ahead of the sweep and writes it.
 Azure DevOps sends none; the sweep covers it, and reads GitLab's and Azure
 DevOps's CI jobs too. GitHub's `workflow_job` reads nothing again: it is measured as telemetry, below. An App made
-before redgreen asked for that event needs it ticked under the App's
+before Muster asked for that event needs it ticked under the App's
 "Subscribe to events" (it needs no new permission).
 
 ### One-time setup
@@ -297,8 +297,8 @@ before redgreen asked for that event needs it ticked under the App's
 On your own machine:
 
 ```bash
-PUBLIC_URL=https://redgreen.example.org redgreen setup github [--org <org>]
-GITLAB_URL=... GITLAB_CLIENT_ID=... GITLAB_CLIENT_SECRET=... redgreen setup gitlab
+PUBLIC_URL=https://muster.example.org muster setup github [--org <org>]
+GITLAB_URL=... GITLAB_CLIENT_ID=... GITLAB_CLIENT_SECRET=... muster setup gitlab
 ```
 
 Each opens a page on `127.0.0.1:8765`, sends you to the forge, takes the
@@ -311,7 +311,7 @@ scope.
 ### Carrying history over
 
 ```bash
-ORRERY_URL=... ORRERY_TOKEN=... ORRERY_READ_TOKEN=... redgreen import-history <old sqlite>
+ORRERY_URL=... ORRERY_TOKEN=... ORRERY_READ_TOKEN=... muster import-history <old sqlite>
 ```
 
 Reads the old web app's `deployments` table and writes each one with its
@@ -325,17 +325,17 @@ rejected.
 JSON lines on stdout with `trace_id`. With OTLP on: a span per request, per
 sweep, per repository read, and per outbound call, and these metrics:
 
-- `redgreen.build_info` with `version`
-- `redgreen.sync.duration` by provider and outcome
-- `redgreen.quota.remaining` and `redgreen.quota.limit` by provider
-- `redgreen.webhook.lag`, from a delivery to its repository written
-- `redgreen.webhooks` by provider and outcome
-- `redgreen.push.entities` by blueprint and outcome
-- `redgreen.sweep.last_success`, the time of the last sweep that reached every forge
-- `redgreen.actions.jobs` (finished), `redgreen.actions.job.wait` (queued
-  to a runner taking it), and `redgreen.actions.job.duration` (on the
+- `muster.build_info` with `version`
+- `muster.sync.duration` by provider and outcome
+- `muster.quota.remaining` and `muster.quota.limit` by provider
+- `muster.webhook.lag`, from a delivery to its repository written
+- `muster.webhooks` by provider and outcome
+- `muster.push.entities` by blueprint and outcome
+- `muster.sweep.last_success`, the time of the last sweep that reached every forge
+- `muster.actions.jobs` (finished), `muster.actions.job.wait` (queued
+  to a runner taking it), and `muster.actions.job.duration` (on the
   runner), by `repository`, `runner` (`hosted` or `self-hosted`), and `os`,
-  the finished ones by `conclusion` too; and `redgreen.actions.jobs.active`,
+  the finished ones by `conclusion` too; and `muster.actions.jobs.active`,
   the jobs `queued` and `in_progress` now, for tracked repositories.
   - GitHub: from the `workflow_job` webhook. A job is hosted when GitHub's
     own runner group took it, or before one does, when it asks only for
@@ -353,6 +353,77 @@ sweep, per repository read, and per outbound call, and these metrics:
   in flight and never counts a job that had started before it again.
 - `http.server.request.duration`, `process.cpu.time`, `process.memory.usage`
 
+## Upgrade notes
+
+### From redgreen 2.x to Muster 3.0
+
+redgreen is Muster now. The program does the same work under the new name;
+nothing it writes changed shape. An estate changes these, in this order:
+
+1. **Image.** `ghcr.io/orchard-suite/redgreen:<version>` is
+   `ghcr.io/orchard-suite/muster:<version>`, signed by
+   `https://github.com/orchard-suite/muster/`. A cosign policy that names the
+   old identity names the new one.
+2. **Command.** The binary is `/app/muster`, run as `muster serve` (the
+   image's entrypoint and command already say so). A manifest that names
+   `/app/redgreen` or `redgreen serve` names `/app/muster` and `muster serve`.
+   `setup` and `import-history` are `muster setup ...` and
+   `muster import-history`.
+3. **Settings.** No variable carries the name, so every setting stays as it
+   is. `OTEL_SERVICE_NAME` defaults to `muster`; set it only to keep another
+   name. The state file, `DATA_DIR/state.sqlite`, is read as it is; keep the
+   volume.
+4. **Catalog source.** Register a pusher source named `muster` for the same
+   blueprints as `redgreen` (`sw_repository`, `sw_pipeline`, `sw_service`,
+   `sw_api`, `sw_connection`, `sw_deployment` with its delete grant,
+   `sw_issue`, `team`), issue it a token, and give that token to Muster as
+   `ORRERY_TOKEN`. Then hand the old source's entities over before Muster's
+   first run, so it writes on top of them and its next run keeps or deletes
+   them as its own. Without a `scope`, each entity keeps its scope: the
+   scopes are `<forge>/<account>` and the parts under it (`/pipelines`,
+   `/services`, `/apis`, `/connections`, `/issues`, `/deployments`), and
+   `argo-outcomes`, none of which names the program, so Muster takes them
+   up as they are.
+
+   ```bash
+   curl -X POST https://orrery.example.com/v1/sources/redgreen/hand-over \
+     -H "Authorization: Bearer $ADMIN_TOKEN" -d '{"to": "muster"}'
+   ```
+
+   The definitions redgreen offered stay marked as redgreen's, and a field
+   marked as another source's is never replaced by Muster's offer. Hand each
+   one over too, as an admin:
+
+   ```bash
+   for bp in sw_repository sw_pipeline sw_service sw_api sw_connection sw_deployment sw_issue team; do
+     def=$(curl -s -H "Authorization: Bearer $ADMIN_TOKEN" https://orrery.example.com/v1/blueprints/$bp)
+     body=$(jq -c '{source: "muster", fields: [.fields | to_entries[] | select(.value.offered.source == "redgreen") | .key], status: (.status.offered.source == "redgreen")}' <<<"$def")
+     [ "$(jq '(.fields | length) + (if .status then 1 else 0 end)' <<<"$body")" = 0 ] && continue
+     curl -s -X POST -H "Authorization: Bearer $ADMIN_TOKEN" https://orrery.example.com/v1/blueprints/$bp/hand-over -d "$body"
+   done
+   ```
+
+   Once both answer, the `redgreen` source owns nothing: delete it
+   (`DELETE /v1/sources/redgreen`) and revoke its token.
+5. **Metrics.** Every metric and span name starts with `muster.` where it
+   started with `redgreen.`: `muster.build_info`, `muster.sync.duration`,
+   `muster.quota.remaining`, `muster.quota.limit`, `muster.webhook.lag`,
+   `muster.webhooks`, `muster.push.entities`, `muster.sweep.last_success`,
+   `muster.actions.jobs`, `muster.actions.job.wait`,
+   `muster.actions.job.duration`, and `muster.actions.jobs.active`. In
+   Prometheus, `redgreen_*` series are `muster_*`, and the OpenTelemetry
+   `service.name` is `muster`. Dashboards and alerts that name the old
+   series name the new ones; the old series stop at the upgrade.
+6. **Logs.** The `component` of the service's own lines is `muster`, and
+   every forge sees the `User-Agent` `muster`.
+7. **The service's own record.** Muster's `orrery.yaml` names
+   `github/orchard-suite/muster`, with the icon `muster`. An estate that reads
+   the repository gets the new service on the next sweep. Nothing writes
+   the `github/orchard-suite/redgreen` service any more; an admin deletes
+   it, or hands its edits to the new key first.
+8. **The GitHub App** keeps its name and keeps working. `muster setup github`
+   names a new one `muster` unless `--name` says otherwise.
+
 ## Development
 
 ```bash
@@ -368,7 +439,7 @@ installed, `../orrery` by default (`make check ORRERY=<path>` for another).
 A local run against GitHub with a personal token:
 
 ```bash
-GITHUB_TOKEN=$(gh auth token) GITHUB_TOKEN_ACCOUNTS=<owner> go run ./cmd/redgreen serve
+GITHUB_TOKEN=$(gh auth token) GITHUB_TOKEN_ACCOUNTS=<owner> go run ./cmd/muster serve
 ```
 
 The image, for `linux/amd64`:

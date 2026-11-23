@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/provider/providertest"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider/providertest"
 )
 
 const repoPath = "/repos/acme/mirror"
@@ -169,7 +169,7 @@ func TestConditionalRequestsKeepFactsNotBodies(t *testing.T) {
 		t.Fatalf("no kept answer: %v", err)
 	}
 	if strings.Contains(string(kept.Facts), "node_id") || strings.Contains(string(kept.Facts), "permissions") {
-		t.Errorf("kept facts carry fields redgreen does not read: %s", kept.Facts)
+		t.Errorf("kept facts carry fields muster does not read: %s", kept.Facts)
 	}
 }
 

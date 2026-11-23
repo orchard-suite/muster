@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 VERSION := $(shell cut -d' ' -f1 VERSION)
-IMAGE := ghcr.io/orchard-suite/redgreen
+IMAGE := ghcr.io/orchard-suite/muster
 # The Orrery checkout the expression check runs against.
 ORRERY ?= ../orrery
 BRANCH ?=

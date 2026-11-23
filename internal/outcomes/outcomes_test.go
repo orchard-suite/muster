@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
 var t0 = time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
@@ -145,7 +145,7 @@ func TestPreviousKeepsStreamsAndMomentsApart(t *testing.T) {
 
 func TestParseRepoURL(t *testing.T) {
 	for in, want := range map[string]RepoRef{
-		"https://github.com/acme/redgreen":                            {provider.GitHub, "acme/redgreen", ""},
+		"https://github.com/acme/muster":                              {provider.GitHub, "acme/muster", ""},
 		"https://github.com/acme/platform/tree/main/workloads/portal": {provider.GitHub, "acme/platform", "workloads/portal"},
 		"https://github.com/o/r.git":                                  {provider.GitHub, "o/r", ""},
 		"https://gitlab.com/group/sub/project":                        {provider.GitLab, "group/sub/project", ""},
@@ -196,7 +196,7 @@ func TestMapSyncsSaysWhyEachWasLeftOut(t *testing.T) {
 		return w
 	}
 	apps := []HubApp{
-		app("cluster-a/argocd/redgreen", "https://github.com/acme/platform", "workloads/redgreen", "redgreen", "production"),
+		app("cluster-a/argocd/muster", "https://github.com/acme/platform", "workloads/muster", "muster", "production"),
 		app("cluster-a/argocd/portal", "https://github.com/acme/platform", "workloads/portal", "portal", ""),
 		app("cluster-a/argocd/cert-manager", "https://charts.jetstack.io", "", "", ""),
 		app("cluster-a/argocd/ember", "https://github.com/acme/platform", "workloads/ember", "ember", ""),
@@ -207,13 +207,13 @@ func TestMapSyncsSaysWhyEachWasLeftOut(t *testing.T) {
 		app("cluster-a/argocd/gone", "https://github.com/acme/platform", "workloads/gone", "nowhere", ""),
 	}
 	workloads := []HubWorkload{
-		workload("redgreen", "https://github.com/acme/redgreen"),
+		workload("muster", "https://github.com/acme/muster"),
 		workload("portal", "https://github.com/acme/platform/tree/main/workloads/portal"),
 		workload("ember", ""),
 		workload("beacon", "https://github.com/acme/beacon"),
 	}
 	targets := map[string][]Target{
-		"github/acme/redgreen": {{Key: "github/acme/redgreen"}},
+		"github/acme/muster":   {{Key: "github/acme/muster"}},
 		"github/acme/platform": {{Key: "github/acme/platform"}, {Key: "github/acme/platform/workloads/portal", Path: "workloads/portal"}},
 		"github/acme/orders":   {{Key: "github/acme/orders"}, {Key: "github/acme/orders/deploy", Path: "deploy"}},
 		"github/acme/shop":     {{Key: "github/acme/shop"}},
@@ -224,20 +224,20 @@ func TestMapSyncsSaysWhyEachWasLeftOut(t *testing.T) {
 		Declared: []Declared{
 			{Source: shopSource, RepoKey: "github/acme/shop", Target: Target{Key: "github/acme/shop"}},
 			{Source: twiceSource, RepoKey: "github/acme/shop", Target: Target{Key: "github/acme/shop"}},
-			{Source: twiceSource, RepoKey: "github/acme/redgreen", Target: Target{Key: "github/acme/redgreen"}},
+			{Source: twiceSource, RepoKey: "github/acme/muster", Target: Target{Key: "github/acme/muster"}},
 		},
 		Targets: func(key string) []Target { return targets[key] },
 	}
 	at := "2026-10-30T10:00:05Z"
 	got, m := MapSyncs([]HubDeployment{
-		sync("cluster-a/argocd/redgreen/3", "cluster-a/argocd/redgreen", "succeeded", at),
+		sync("cluster-a/argocd/muster/3", "cluster-a/argocd/muster", "succeeded", at),
 		sync("cluster-a/argocd/portal/9", "cluster-a/argocd/portal", "failed", at),
 		sync("cluster-a/argocd/shop/1", "cluster-a/argocd/shop", "succeeded", at),
 		sync("cluster-a/argocd/orders/1", "cluster-a/argocd/orders", "succeeded", at),
 		sync("a", "cluster-a/argocd/cert-manager", "succeeded", at),
 		sync("b", "cluster-a/argocd/ember", "succeeded", at),
 		sync("c", "cluster-a/argocd/beacon", "succeeded", at),
-		sync("d", "cluster-a/argocd/redgreen", "succeeded", ""),
+		sync("d", "cluster-a/argocd/muster", "succeeded", ""),
 		sync("e", "", "succeeded", at),
 		sync("f", "cluster-a/argocd/twice", "succeeded", at),
 		sync("g", "cluster-a/argocd/gone", "succeeded", at),
@@ -251,7 +251,7 @@ func TestMapSyncsSaysWhyEachWasLeftOut(t *testing.T) {
 		rows = append(rows, row{r.Key, r.RepoKey, r.Folder, r.Service, r.Environment, r.Elsewhere})
 	}
 	want := []row{
-		{"cluster-a/argocd/redgreen/3", "github/acme/redgreen", "", "github/acme/redgreen", "production", true},
+		{"cluster-a/argocd/muster/3", "github/acme/muster", "", "github/acme/muster", "production", true},
 		{"cluster-a/argocd/portal/9", "github/acme/platform", "workloads/portal", "github/acme/platform/workloads/portal", "production", false},
 		{"cluster-a/argocd/shop/1", "github/acme/shop", "", "github/acme/shop", "production", true},
 		{"cluster-a/argocd/orders/1", "github/acme/orders", "deploy", "github/acme/orders/deploy", "production", false},

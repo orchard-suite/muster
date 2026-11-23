@@ -17,10 +17,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/state"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/state"
+	"github.com/orchard-suite/muster/internal/telemetry"
 )
 
 const (
@@ -140,7 +140,7 @@ func (p *Provider) accessToken(ctx context.Context) (string, error) {
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", "redgreen")
+	req.Header.Set("User-Agent", "muster")
 	res, err := p.http.Do(req)
 	if err != nil {
 		return "", err

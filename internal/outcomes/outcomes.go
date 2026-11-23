@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/catalog"
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/catalog"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
 // followWithin is how soon after a deployment a fix-only deployment, or an

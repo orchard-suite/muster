@@ -17,14 +17,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/state"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/state"
+	"github.com/orchard-suite/muster/internal/telemetry"
 	"gopkg.in/yaml.v3"
 )
 
-// Config is how redgreen signs in to GitHub. An app wins over a token.
+// Config is how Muster signs in to GitHub. An app wins over a token.
 type Config struct {
 	// API is GitHub's REST root; empty is api.github.com.
 	API           string

@@ -1,4 +1,4 @@
-// Package catalog is what redgreen writes to Orrery: the blueprints it
+// Package catalog is what Muster writes to Orrery: the blueprints it
 // offers, and the mapping from what a forge said to the entities written.
 // Health and DORA are calculations and aggregations in the blueprints, so
 // Orrery computes them when a page is read and a rule change needs no resync.
@@ -8,8 +8,8 @@ import (
 	"bytes"
 	"encoding/json"
 
+	"github.com/orchard-suite/muster/internal/services"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/services"
 )
 
 // Field is one field definition, in the order it is offered.
@@ -210,7 +210,7 @@ func RepositoryBlueprint() sdk.Blueprint {
 			f("has_readme", typed("boolean", "title", "Has README")),
 			f("has_dockerfile", typed("boolean", "title", "Has Dockerfile")),
 			f("has_ci", typed("boolean", "title", "Has CI")),
-			f("paths_present", typed("array", "title", "Paths present", "description", "The paths the estate asked redgreen to look for that exist on the default branch, as files or folders. Empty when it looked and found none; unset when it did not look.")),
+			f("paths_present", typed("array", "title", "Paths present", "description", "The paths the estate asked muster to look for that exist on the default branch, as files or folders. Empty when it looked and found none; unset when it did not look.")),
 			f("last_push", typed("datetime")),
 			f("last_committer", typed("string", "description", "Who made the newest commit on the default branch, as the forge names them.")),
 			f("last_committer_email", typed("string", "title", "Last committer email", "description", "The address on that commit, lowercase. It may be a personal or made-up address.")),
@@ -303,9 +303,9 @@ func DORA(relation string) Fields {
 func ServiceBlueprint() sdk.Blueprint {
 	return sdk.Blueprint{
 		"id": Service, "title": "Service", "group": "Catalog", "icon": "azure_service_fabric_clusters", "formerly": []string{"service"},
-		"description": "One deployable piece of software, keyed by its repository path. redgreen finds each from the files that build it and writes where it lives, what it is, and what it is written in, with its DORA measures from its deployments. A repository's orrery.yaml adds the APIs its service offers and calls.",
+		"description": "One deployable piece of software, keyed by its repository path. muster finds each from the files that build it and writes where it lives, what it is, and what it is written in, with its DORA measures from its deployments. A repository's orrery.yaml adds the APIs its service offers and calls.",
 		"fields": join(Fields{
-			f("origin", typed("enum", "values", []string{"built", "adopted"}, "chip", true, "description", "Built here, or open source the estate runs. Every service redgreen finds is built here.")),
+			f("origin", typed("enum", "values", []string{"built", "adopted"}, "chip", true, "description", "Built here, or open source the estate runs. Every service muster finds is built here.")),
 			f("path", typed("string", "description", "Where it sits in its repository, empty for one that is the whole repository.")),
 			f("type", typed("enum", "values", []string{"backend", "frontend", "library", "infrastructure", "tool", "docs", "other"}, "description", "What kind of thing it is, read from the files that build it.")),
 			f("language", typed("enum", "values", services.Languages, "sticky", true, "description", "What it is written in, read from the files that build it. A person who knows better changes it, and that change stays.")),
@@ -331,7 +331,7 @@ func ServiceBlueprint() sdk.Blueprint {
 func APIBlueprint() sdk.Blueprint {
 	return sdk.Blueprint{
 		"id": API, "title": "API", "group": "Catalog", "formerly": []string{"api"},
-		"description": "An interface a service offers others, keyed <service key>/<id>. redgreen writes each one a repository's orrery.yaml provides.",
+		"description": "An interface a service offers others, keyed <service key>/<id>. muster writes each one a repository's orrery.yaml provides.",
 		"fields": Fields{
 			f("description", typed("string")),
 			f("kind", typed("enum", "values", services.APIKinds)),
@@ -344,7 +344,7 @@ func APIBlueprint() sdk.Blueprint {
 }
 
 // ConnectionBlueprint is one running thing reaching one host, as one source
-// saw it. redgreen writes the ones a service's config files name (evidence
+// saw it. Muster writes the ones a service's config files name (evidence
 // code), keyed <service key>@<environment>><host>[/<database>]@code. It
 // offers only what it writes, each exactly as an estate defines it: the
 // links from a host to the resource it reaches, and from an environment's
@@ -379,7 +379,7 @@ func TeamDORA() sdk.Blueprint {
 func DeploymentBlueprint() sdk.Blueprint {
 	return sdk.Blueprint{
 		"id": Deployment, "title": "Deployment", "group": "Kubernetes", "icon": "rocket", "formerly": []string{"deployment"},
-		"description": "One rollout of software to an environment. History, kept 180 days. redgreen writes the ones a forge records and adds lead time, failure, and restore to every one, Argo CD syncs included.",
+		"description": "One rollout of software to an environment. History, kept 180 days. muster writes the ones a forge records and adds lead time, failure, and restore to every one, Argo CD syncs included.",
 		"lifecycle":   map[string]any{"expire": map[string]any{"after": "180d", "field": "deployed_at"}},
 		"fields": Fields{
 			f("status", typed("enum", "values", []string{"succeeded", "failed", "running", "cancelled"})),
@@ -426,7 +426,7 @@ func IssueBlueprint() sdk.Blueprint {
 			f("checks", typed("enum", "values", []string{"success", "failure", "pending", "none"}, "description", "A pull request's checks; empty where they were not read.")),
 			f("created_at", typed("datetime")),
 			f("updated_at", typed("datetime")),
-			f("closed_at", typed("datetime", "description", "When redgreen first saw it gone from the open list.")),
+			f("closed_at", typed("datetime", "description", "When muster first saw it gone from the open list.")),
 		},
 		"relations": map[string]any{"repository": map[string]any{"target": Repository, "many": false, "title": "Repository", "inverseTitle": "Issues"}},
 	}

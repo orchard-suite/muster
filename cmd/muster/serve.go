@@ -14,18 +14,18 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/orchard-suite/muster/internal/catalog"
+	"github.com/orchard-suite/muster/internal/config"
+	"github.com/orchard-suite/muster/internal/outcomes"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider/azuredevops"
+	"github.com/orchard-suite/muster/internal/provider/github"
+	"github.com/orchard-suite/muster/internal/provider/gitlab"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/state"
+	msync "github.com/orchard-suite/muster/internal/sync"
+	"github.com/orchard-suite/muster/internal/telemetry"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/catalog"
-	"github.com/orchard-suite/redgreen/internal/config"
-	"github.com/orchard-suite/redgreen/internal/outcomes"
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/provider/azuredevops"
-	"github.com/orchard-suite/redgreen/internal/provider/github"
-	"github.com/orchard-suite/redgreen/internal/provider/gitlab"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/state"
-	rgsync "github.com/orchard-suite/redgreen/internal/sync"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
 )
 
 // webhookLimit is the largest webhook body read.
@@ -36,7 +36,7 @@ const stateFile = "state.sqlite"
 
 func serve() error {
 	base := telemetry.NewLogger(os.Stdout)
-	log := base.With("component", "redgreen")
+	log := base.With("component", "muster")
 	cfg, err := config.Load()
 	if err != nil {
 		return err
@@ -93,7 +93,7 @@ func serve() error {
 	if u, err := url.Parse(cfg.GitLabURL); err == nil {
 		gitlabHost = u.Hostname()
 	}
-	engine := rgsync.New(rgsync.Options{Providers: providers, Store: store, Push: push, Read: reader, Tel: tel, Log: base.With("component", "sync"),
+	engine := msync.New(msync.Options{Providers: providers, Store: store, Push: push, Read: reader, Tel: tel, Log: base.With("component", "sync"),
 		Bots: services.Bots{Extra: cfg.BotAuthors}, Probe: cfg.ProbePaths, Interval: cfg.SyncInterval, Concurrency: cfg.Concurrency, GitLabHost: gitlabHost, ComponentFields: cfg.ComponentFields, ArgoServices: cfg.ArgoServices,
 		Flaky: catalog.FlakyRule{Window: cfg.FlakyWindowRuns, Clear: cfg.FlakyClearRuns, MaxAge: time.Duration(cfg.FlakyMaxAgeDays) * 24 * time.Hour}})
 	go engine.Run(ctx)

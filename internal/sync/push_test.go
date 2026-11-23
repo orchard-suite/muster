@@ -12,12 +12,12 @@ import (
 	gosync "sync"
 	"testing"
 
+	"github.com/orchard-suite/muster/internal/catalog"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider/providertest"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/telemetry"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/catalog"
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/provider/providertest"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
 )
 
 // hub is a fake Orrery with its write rules: a run's write replaces every
@@ -155,7 +155,7 @@ func TestASweepAfterAPushKeepsTheDeclaredFields(t *testing.T) {
 		}
 	}
 	if got["origin"] != "built" {
-		t.Errorf("the service lost what redgreen reads itself: %v", got)
+		t.Errorf("the service lost what muster reads itself: %v", got)
 	}
 
 	e.pushAccount(ctx, a, []string{key})

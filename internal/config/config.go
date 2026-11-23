@@ -1,4 +1,4 @@
-// Package config reads redgreen's settings from the environment.
+// Package config reads Muster's settings from the environment.
 package config
 
 import (

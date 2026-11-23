@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/services"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/services"
 )
 
 // RepoKey is a repository's key on the hub: forge, owner, and name, lowercase.
@@ -181,7 +181,7 @@ func ServiceEntities(r *provider.Repo, found *services.Found, icons map[string]s
 // describe puts what an orrery.yaml says on its service: its logo, the APIs
 // it calls, and its place. An empty list is written as one, so a connector
 // removed from the file leaves the catalog. A name the place shares with
-// what redgreen reads takes the file's value. A service given a place is
+// what Muster reads takes the file's value. A service given a place is
 // kept in bare as it stood before.
 func describe(e *sdk.Entity, d *services.Description, icons map[string]string, bare map[string]sdk.Entity) {
 	if d.Icon != nil {
@@ -276,7 +276,7 @@ func DeploymentService(repoKey string, found *services.Found, folder string) str
 	return ""
 }
 
-// Outcome is what redgreen computes about one deployment.
+// Outcome is what Muster computes about one deployment.
 type Outcome struct {
 	LeadTimeHours *float64
 	CommitCount   *int

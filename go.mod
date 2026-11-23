@@ -1,4 +1,4 @@
-module github.com/orchard-suite/redgreen
+module github.com/orchard-suite/muster
 
 go 1.27.4
 

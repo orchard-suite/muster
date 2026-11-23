@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 	"github.com/robfig/cron/v3"
 )
 
@@ -25,7 +25,7 @@ func decisive(r provider.Run) bool {
 	return r.Status == provider.StatusCompleted && r.Conclusion != "" && !inconclusive[r.Conclusion]
 }
 
-// Health is what redgreen works out about one pipeline from its runs. The
+// Health is what Muster works out about one pipeline from its runs. The
 // rules and their severities are applied in Orrery.
 type Health struct {
 	LastStatus  string
@@ -53,7 +53,7 @@ type Health struct {
 }
 
 // Judge works out a pipeline's health at now. runs are the forge's recent
-// runs, newest first; history is every run redgreen kept for it, for the
+// runs, newest first; history is every run Muster kept for it, for the
 // windows a forge's short list cannot cover.
 func Judge(p provider.Pipeline, defaultBranch string, history []provider.Run, release Release, flaky FlakyRule, now time.Time) Health {
 	var h Health

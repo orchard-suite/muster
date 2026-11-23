@@ -1,4 +1,4 @@
-// Command blueprints prints the blueprints redgreen offers, as JSON, for
+// Command blueprints prints the blueprints Muster offers, as JSON, for
 // scripts/check-expressions.mts.
 package main
 
@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/orchard-suite/redgreen/internal/catalog"
+	"github.com/orchard-suite/muster/internal/catalog"
 )
 
 func main() {

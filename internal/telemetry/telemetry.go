@@ -26,7 +26,7 @@ import (
 )
 
 // Service is the name every span, metric, and log carries.
-const Service = "redgreen"
+const Service = "muster"
 
 // Quota is one rate limit a forge reported.
 type Quota struct {

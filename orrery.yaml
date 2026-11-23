@@ -1,11 +1,11 @@
 # What this repository builds, for the Orrery of an estate that reads it.
-# redgreen reads this file with the repository and writes the service, its
+# muster reads this file with the repository and writes the service, its
 # logo, and the APIs it calls; an estate that does not read this repository
 # never lists it. `fields` and `relations` place it in the estate's platform
 # pillars (plat_pillar); an API key is the providing service's key and its id.
-service: github/orchard-suite/redgreen
+service: github/orchard-suite/muster
 icon:
-  name: redgreen
+  name: muster
   file: logo.svg
 fields:
   category: Delivery outcomes

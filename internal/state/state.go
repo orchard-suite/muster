@@ -1,4 +1,4 @@
-// Package state is redgreen's small, rebuildable store: per request URL the
+// Package state is Muster's small, rebuildable store: per request URL the
 // ETag and the normalised facts read from that answer, never the raw body;
 // webhook delivery ids; the run, deployment, and issue facts that outlive one
 // forge answer, with the files each deployed range changed; and what was last

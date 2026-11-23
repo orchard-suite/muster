@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
-// The shapes of the REST answers redgreen reads. Only the fields used are
+// The shapes of the REST answers Muster reads. Only the fields used are
 // declared, so the facts kept for a conditional request are only these.
 
 type ghOwner struct {

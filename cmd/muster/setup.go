@@ -17,8 +17,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/config"
-	"github.com/orchard-suite/redgreen/internal/provider/gitlab"
+	"github.com/orchard-suite/muster/internal/config"
+	"github.com/orchard-suite/muster/internal/provider/gitlab"
 )
 
 // The one-time forge setup runs on the owner's machine. Each flow serves a
@@ -57,9 +57,9 @@ func randomHex(n int) string {
 	return hex.EncodeToString(b)
 }
 
-var manifestPage = template.Must(template.New("m").Parse(`<!doctype html><title>redgreen setup</title>
+var manifestPage = template.Must(template.New("m").Parse(`<!doctype html><title>muster setup</title>
 <form method="post" action="{{.Action}}"><input type="hidden" name="manifest" value="{{.Manifest}}">
-<p>Creates the GitHub App redgreen reads with. Read-only.</p><button>Create the app on GitHub</button></form>`))
+<p>Creates the GitHub App muster reads with. Read-only.</p><button>Create the app on GitHub</button></form>`))
 
 // setupGitHub runs the GitHub App manifest flow, or reads the app an old
 // store created through its settings page.
@@ -67,8 +67,8 @@ func setupGitHub(args []string) error {
 	fs := flag.NewFlagSet("setup github", flag.ContinueOnError)
 	org := fs.String("org", "", "create the app under this organization instead of your account")
 	port := fs.Int("port", 8765, "local port for the callback")
-	name := fs.String("name", "redgreen", "the app's name on GitHub")
-	fromStore := fs.String("from-store", "", "read the app from an old redgreen store instead, with SECRET_KEY")
+	name := fs.String("name", "muster", "the app's name on GitHub")
+	fromStore := fs.String("from-store", "", "read the app from an old muster store instead, with SECRET_KEY")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func setupGitHub(args []string) error {
 		return err
 	}
 	if !strings.HasPrefix(cfg.PublicURL, "https://") {
-		return errors.New("set PUBLIC_URL to where GitHub reaches redgreen's webhooks, https://")
+		return errors.New("set PUBLIC_URL to where GitHub reaches muster's webhooks, https://")
 	}
 	manifest, _ := json.Marshal(map[string]any{
 		"name": *name, "url": cfg.PublicURL, "description": "The forges' door into Orrery. Read-only.", "public": true,
@@ -175,12 +175,12 @@ func githubFromStore(path, key string) error {
 }
 
 // setupGitLab authorizes the OAuth application once and prints the refresh
-// token redgreen starts from. The application's redirect URI must be
+// token Muster starts from. The application's redirect URI must be
 // http://127.0.0.1:<port>/callback, with the read_api scope.
 func setupGitLab(args []string) error {
 	fs := flag.NewFlagSet("setup gitlab", flag.ContinueOnError)
 	port := fs.Int("port", 8765, "local port for the callback")
-	fromStore := fs.String("from-store", "", "read the OAuth application and its tokens from an old redgreen store instead, with SECRET_KEY")
+	fromStore := fs.String("from-store", "", "read the OAuth application and its tokens from an old muster store instead, with SECRET_KEY")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -227,16 +227,16 @@ func setupGitLab(args []string) error {
 		_, _ = rand.Read(key)
 		fmt.Println("SECRET_KEY=" + base64.StdEncoding.EncodeToString(key))
 	}
-	fmt.Println("redgreen replaces the refresh token on first use and keeps the new one in its state, sealed with SECRET_KEY.")
+	fmt.Println("muster replaces the refresh token on first use and keeps the new one in its state, sealed with SECRET_KEY.")
 	fmt.Println("Point each project or group webhook at " + cfg.PublicURL + "/api/webhooks/gitlab with the secret token above.")
 	return nil
 }
 
-// setupAzureDevOps reads the service principal from an old redgreen store.
+// setupAzureDevOps reads the service principal from an old Muster store.
 // A new one is registered in Entra, not here; see the README.
 func setupAzureDevOps(args []string) error {
 	fs := flag.NewFlagSet("setup azuredevops", flag.ContinueOnError)
-	fromStore := fs.String("from-store", "", "the old redgreen store to read, with SECRET_KEY")
+	fromStore := fs.String("from-store", "", "the old muster store to read, with SECRET_KEY")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}

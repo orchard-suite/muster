@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider"
 )
 
 // RepoRef is a repository, and a folder in it, named by a browser URL in a catalog.

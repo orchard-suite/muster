@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/telemetry"
 )
 
 // Kind names a forge.

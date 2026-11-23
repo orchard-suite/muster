@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/state"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/state"
 )
 
 // The hub's entities as /v1/entities answers them, the parts read here.
@@ -35,7 +35,7 @@ type HubDeployment struct {
 }
 
 // HubReport is an sw_deployment that names the forge job it records by its
-// address: one a CI job reports itself, or redgreen's own.
+// address: one a CI job reports itself, or Muster's own.
 type HubReport struct {
 	Key    string `json:"key"`
 	Owner  string `json:"owner"`
@@ -49,13 +49,13 @@ type HubReport struct {
 type Handover struct {
 	// Elsewhere is, by the forge job's address, the entity another source keeps for it.
 	Elsewhere map[string]string
-	// Copies are redgreen's own entities for those jobs, to be deleted.
+	// Copies are Muster's own entities for those jobs, to be deleted.
 	Copies []string
 }
 
-// HandOver reads the reports for the jobs another source keeps. redgreen is
+// HandOver reads the reports for the jobs another source keeps. Muster is
 // whoever owns one of its own keys (`own`), so it needs no name of its own; a
-// job reported by redgreen alone is redgreen's. Until the hub holds one of its
+// job reported by Muster alone is Muster's. Until the hub holds one of its
 // keys, nothing is handed over.
 func HandOver(reports []HubReport, own func(key string) bool) Handover {
 	self := map[string]bool{}
@@ -289,7 +289,7 @@ func after[T any](list []T, at func(T) string, from time.Time) []T {
 
 // Reported reads the deployments since `from` that name a forge job's address
 // and are no Argo CD sync, whoever wrote them. A forge job another source
-// reports is that source's: redgreen adds its outcome to it and keeps no
+// reports is that source's: Muster adds its outcome to it and keeps no
 // entity of its own (`HandOver`).
 func (r Reader) Reported(ctx context.Context, from time.Time) ([]HubReport, error) {
 	filter := map[string]any{"and": []any{since("deployed_at", from), map[string]any{"field": "url", "op": "exists"}, map[string]any{"not": map[string]any{"relation": "app"}}}}

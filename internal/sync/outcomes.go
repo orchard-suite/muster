@@ -9,11 +9,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/orchard-suite/muster/internal/catalog"
+	"github.com/orchard-suite/muster/internal/outcomes"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/state"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/catalog"
-	"github.com/orchard-suite/redgreen/internal/outcomes"
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/state"
 )
 
 // commitReadsPerRepo bounds the compares made for one repository in one pass,
@@ -43,7 +43,7 @@ func (e *Engine) pushOutcomes(ctx context.Context) {
 	if !ok || !allowed(catalog.Deployment) {
 		return
 	}
-	ctx, span := e.o.Tel.Start(ctx, "redgreen.outcomes")
+	ctx, span := e.o.Tel.Start(ctx, "muster.outcomes")
 	now := time.Now()
 	e.mu.Lock()
 	keys := make([]string, 0, len(e.repos))
@@ -101,7 +101,7 @@ func (e *Engine) pushOutcomes(ctx context.Context) {
 	elsewhere := map[string]string{}
 	if e.o.Read != nil {
 		if reports, err := e.o.Read.Reported(ctx, now.Add(-window)); err != nil {
-			e.o.Log.WarnContext(ctx, "deployments other sources report unreadable; forge deployments are written as redgreen's own", "error", err)
+			e.o.Log.WarnContext(ctx, "deployments other sources report unreadable; forge deployments are written as muster's own", "error", err)
 		} else {
 			handover := outcomes.HandOver(reports, func(key string) bool { _, ok := forge[key]; return ok })
 			elsewhere = handover.Elsewhere
@@ -296,7 +296,7 @@ func (e *Engine) places(ctx context.Context, keys []string) outcomes.Places {
 
 // linked is the operator's ARGOCD_SERVICES links, each tied to the service
 // it names: one a watched repository holds, else one the hub holds, whoever
-// wrote it. A service only the hub holds has no repository redgreen reads,
+// wrote it. A service only the hub holds has no repository Muster reads,
 // so its syncs carry no commits: they count for deploy frequency and change
 // failure rate, never for lead time. A link to a service neither holds is
 // logged and left out; one whose repository is not read yet waits for the
@@ -401,7 +401,7 @@ func (e *Engine) hubServices(ctx context.Context) map[string]linkTarget {
 	return out
 }
 
-// dropUnmade deletes the deployments redgreen made under a key of its own
+// dropUnmade deletes the deployments Muster made under a key of its own
 // shape (`<key>@<service>`, `<service>@run-<id>`) that this pass did not make
 // again: a service gone from a deployment, or a service that stopped
 // deploying by its pipeline. Only a repository whose deployments were all
@@ -439,10 +439,10 @@ func (e *Engine) dropUnmade(ctx context.Context, made, settled map[string]bool) 
 	e.o.Log.InfoContext(ctx, "deployments no longer made deleted", "deleted", deleted, "of", len(gone))
 }
 
-// ownShape says whether a key under repo is one redgreen makes: a service's
+// ownShape says whether a key under repo is one Muster makes: a service's
 // pipeline deployment, `<service>@run-<id>`, or a forge deployment's record
 // for a service past its first, `<repo>/<id>@<folder>`. Another source's key
-// that redgreen enriched is never one.
+// that Muster enriched is never one.
 func ownShape(key, repo string) bool {
 	rest := key[len(repo):]
 	if strings.HasPrefix(rest, "@run-") {
@@ -455,7 +455,7 @@ func ownShape(key, repo string) bool {
 	return strings.HasPrefix(after, "run-") || (id != "" && !strings.Contains(id, "/"))
 }
 
-// ownerOf is the repository a key of redgreen's own shape is under: the
+// ownerOf is the repository a key of Muster's own shape is under: the
 // longest repository key it starts with, followed by "/" or "@".
 func ownerOf(key string, repos map[string]bool) string {
 	best := ""
@@ -467,7 +467,7 @@ func ownerOf(key string, repos map[string]bool) string {
 	return best
 }
 
-// dropCopies deletes redgreen's own entities for forge jobs another source
+// dropCopies deletes Muster's own entities for forge jobs another source
 // reports, and forgets what it wrote of them. One already gone counts as
 // deleted; one that fails stays in the hub, so the next pass finds it again.
 func (e *Engine) dropCopies(ctx context.Context, keys []string) {

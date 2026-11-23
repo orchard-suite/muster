@@ -14,13 +14,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/orchard-suite/muster/internal/catalog"
+	"github.com/orchard-suite/muster/internal/outcomes"
+	"github.com/orchard-suite/muster/internal/provider"
+	"github.com/orchard-suite/muster/internal/provider/providertest"
+	"github.com/orchard-suite/muster/internal/services"
+	"github.com/orchard-suite/muster/internal/telemetry"
 	"github.com/orchard-suite/orrery/v2/sdk"
-	"github.com/orchard-suite/redgreen/internal/catalog"
-	"github.com/orchard-suite/redgreen/internal/outcomes"
-	"github.com/orchard-suite/redgreen/internal/provider"
-	"github.com/orchard-suite/redgreen/internal/provider/providertest"
-	"github.com/orchard-suite/redgreen/internal/services"
-	"github.com/orchard-suite/redgreen/internal/telemetry"
 )
 
 // estate is a fake hub: it keeps every entity written, whole, answers list
@@ -426,7 +426,7 @@ func TestALinkPlacesSyncsOnAServiceOnlyTheHubHolds(t *testing.T) {
 	}
 	h.mu.Lock()
 	h.lists["sw_deployment"] = append(h.lists["sw_deployment"], sync("c1/argocd/tool/f", "failed", 30*time.Hour), sync("c1/argocd/tool/g", "succeeded", 29*time.Hour))
-	// Another source wrote this service; no repository redgreen watches holds it.
+	// Another source wrote this service; no repository Muster watches holds it.
 	h.lists["sw_service"] = []map[string]any{{"key": "github/vendor/tool", "fields": map[string]any{"path": nil}, "relations": map[string]any{}}}
 	h.lists["it_incident"] = []map[string]any{{"key": "i1", "fields": map[string]any{"severity": "critical", "opened_at": stamp(30 * time.Minute), "mitigated_at": stamp(6 * time.Minute)},
 		"relations": map[string]any{"service": []any{map[string]any{"key": "github/vendor/tool"}}}}}
@@ -462,7 +462,7 @@ func TestALinkPlacesSyncsOnAServiceOnlyTheHubHolds(t *testing.T) {
 		}
 		for _, f := range []string{"lead_time_hours", "commit_count", "fix_only"} {
 			if v, ok := x.Fields[f]; !ok || v != nil {
-				t.Errorf("%s %s = %v, want it written empty: no repository redgreen reads says", key, f, v)
+				t.Errorf("%s %s = %v, want it written empty: no repository muster reads says", key, f, v)
 			}
 		}
 	}
@@ -524,7 +524,7 @@ func TestAServiceThatDeploysByItsPipelineGetsADeploymentPerRevision(t *testing.T
 	}
 }
 
-func TestOnlyKeysOfRedgreensOwnShapeAreRemoved(t *testing.T) {
+func TestOnlyKeysOfMustersOwnShapeAreRemoved(t *testing.T) {
 	repo := "gitlab/example/shop"
 	for key, want := range map[string]bool{
 		repo + "/201@services/web":     true,

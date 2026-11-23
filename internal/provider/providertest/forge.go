@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/orchard-suite/redgreen/internal/state"
+	"github.com/orchard-suite/muster/internal/state"
 )
 
 // Route is one recorded answer. File is read from testdata; Status defaults to

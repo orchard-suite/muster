@@ -1,11 +1,11 @@
-// Command redgreen is the forges' door into Orrery: it watches GitHub,
+// Command Muster is the forges' door into Orrery: it watches GitHub,
 // GitLab, and Azure DevOps and writes repositories, pipelines, services,
 // deployments, and issues to the catalog.
 //
-//	redgreen serve                         run the service
-//	redgreen setup github [flags]          create the GitHub App, or read it from an old store
-//	redgreen setup gitlab [flags]          authorize the GitLab OAuth application
-//	redgreen import-history <old sqlite>   carry the old store's deployments to Orrery
+//	Muster serve                         run the service
+//	Muster setup github [flags]          create the GitHub App, or read it from an old store
+//	Muster setup gitlab [flags]          authorize the GitLab OAuth application
+//	Muster import-history <old sqlite>   carry the old store's deployments to Orrery
 package main
 
 import (
@@ -18,11 +18,11 @@ import (
 var version = "dev"
 
 const usage = `usage:
-  redgreen serve
-  redgreen setup github [--org <org>] [--port 8765] [--from-store <old sqlite>]
-  redgreen setup gitlab [--port 8765] [--from-store <old sqlite>]
-  redgreen setup azuredevops --from-store <old sqlite>
-  redgreen import-history <old sqlite>`
+  muster serve
+  muster setup github [--org <org>] [--port 8765] [--from-store <old sqlite>]
+  muster setup gitlab [--port 8765] [--from-store <old sqlite>]
+  muster setup azuredevops --from-store <old sqlite>
+  muster import-history <old sqlite>`
 
 func main() {
 	args := os.Args[1:]
@@ -43,7 +43,7 @@ func main() {
 		os.Exit(2)
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "redgreen:", err)
+		fmt.Fprintln(os.Stderr, "muster:", err)
 		os.Exit(1)
 	}
 }
