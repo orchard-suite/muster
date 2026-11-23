@@ -55,6 +55,12 @@ All notable changes to this project will be documented in this file. See [standa
 * one language list and open fields ([dafe517](https://github.com/orchard-suite/redgreen/commit/dafe5174f0f73ab5ec834e686569882f91c35749))
 * push forge deployments to orrery ([185abff](https://github.com/orchard-suite/redgreen/commit/185abff406076d4b4a343b502ade925caf96625e))
 
+## [2.0.1](https://github.com/orchard-suite/redgreen/compare/v2.0.0...v2.0.1) (2026-11-23)
+
+### Bug Fixes
+
+* **redgreen:** take orrery by its v2 module ([ef285de](https://github.com/orchard-suite/redgreen/commit/ef285de6ce4bad1046894464c3618fbf1684a991))
+
 ## [2.0.0](https://github.com/orchard-suite/redgreen/compare/v1.12.2...v2.0.0) (2026-11-23)
 
 ### ⚠ BREAKING CHANGES
