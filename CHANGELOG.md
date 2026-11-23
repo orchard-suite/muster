@@ -55,6 +55,12 @@ All notable changes to this project will be documented in this file. See [standa
 * one language list and open fields ([dafe517](https://github.com/orchard-suite/redgreen/commit/dafe5174f0f73ab5ec834e686569882f91c35749))
 * push forge deployments to orrery ([185abff](https://github.com/orchard-suite/redgreen/commit/185abff406076d4b4a343b502ade925caf96625e))
 
+## [3.1.1](https://github.com/orchard-suite/muster/compare/v3.1.0...v3.1.1) (2026-11-23)
+
+### Bug Fixes
+
+* **muster:** retire the services of archived repos ([56b1cda](https://github.com/orchard-suite/muster/commit/56b1cda7423a488456b6f953169609b87d1fd8e3))
+
 ## [3.1.0](https://github.com/orchard-suite/muster/compare/v3.0.0...v3.1.0) (2026-11-23)
 
 ### Features
