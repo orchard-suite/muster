@@ -3,7 +3,7 @@ module github.com/orchard-suite/redgreen
 go 1.27.4
 
 require (
-	github.com/orchard-suite/orrery v1.158.6-0.20261123032703-84db5888be74
+	github.com/orchard-suite/orrery/v2 v2.0.2
 	github.com/robfig/cron/v3 v3.0.1
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.47.0

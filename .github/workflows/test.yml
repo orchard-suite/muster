@@ -24,7 +24,7 @@ jobs:
       # so the calculations are proved by the code redgreen builds against.
       - name: Check out Orrery at the version go.mod requires
         run: |
-          version=$(go list -m -f '{{.Version}}' github.com/orchard-suite/orrery)
+          version=$(go list -m -f '{{.Version}}' github.com/orchard-suite/orrery/v2)
           commit=${version##*-}
           case "$version" in *-*-*) ;; *) commit=$version ;; esac
           git clone --filter=blob:none --quiet https://github.com/orchard-suite/orrery "$RUNNER_TEMP/orrery"

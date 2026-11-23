@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orchard-suite/orrery/sdk"
+	"github.com/orchard-suite/orrery/v2/sdk"
 	"github.com/orchard-suite/redgreen/internal/provider"
 	"github.com/orchard-suite/redgreen/internal/services"
 )

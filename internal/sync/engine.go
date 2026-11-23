@@ -14,7 +14,7 @@ import (
 	gosync "sync"
 	"time"
 
-	"github.com/orchard-suite/orrery/sdk"
+	"github.com/orchard-suite/orrery/v2/sdk"
 	"github.com/orchard-suite/redgreen/internal/catalog"
 	cijobs "github.com/orchard-suite/redgreen/internal/jobs"
 	"github.com/orchard-suite/redgreen/internal/outcomes"

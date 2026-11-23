@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/orchard-suite/orrery/sdk"
+	"github.com/orchard-suite/orrery/v2/sdk"
 	"github.com/orchard-suite/redgreen/internal/catalog"
 	"github.com/orchard-suite/redgreen/internal/config"
 	"github.com/orchard-suite/redgreen/internal/outcomes"

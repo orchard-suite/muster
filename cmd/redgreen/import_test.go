@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/orchard-suite/orrery/sdk"
+	"github.com/orchard-suite/orrery/v2/sdk"
 )
 
 // oldSchema is the part of the old web app's store the import reads.
