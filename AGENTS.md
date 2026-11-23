@@ -99,16 +99,26 @@ https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
   README, Dockerfile, tests, and icon. What people decide about it is never
   pushed; a pushed value would fight their edits.
 - `VERSION` is the version of record.
+- `reader/` is a module of its own (`github.com/orchard-suite/muster/reader`)
+  that Tender imports: the standard library only, and `git` on the path. Its
+  exported surface (`Name`, `Version`, `Config`, `Read`, the report types) is
+  a wire contract with Tender and Muster's door; a change to the report's
+  shape is a new report version, never an edit of version 1. It only reads:
+  never fetch, and keep `GIT_OPTIONAL_LOCKS=0` on every git call. A report
+  never carries a file's name, a path above the checkout's folder, a commit
+  message, or a file's contents. Commit its changes scoped `reader`; they
+  release as `reader/v<version>`.
 
 ## Delivery
 
 Agents push to main and land with `make land` (`make land BRANCH=<branch>`
 from a worktree): it runs `make check`, then `release-damnit land`. CI runs
 the same check on every pull request and before every release, then
-versions every `feat` and `fix` since the last release tag, tags it, and
-builds the tag's image, `ghcr.io/orchard-suite/muster:<version>` for
+versions every `feat` and `fix` since each package's last release tag, tags
+it, and builds the service's image from its bare `v<version>` tag, `ghcr.io/orchard-suite/muster:<version>` for
 `linux/amd64`, signed with cosign. Never edit `VERSION`, the manifest, or
-`CHANGELOG.md` by hand.
+`CHANGELOG.md` by hand. The reader package tags `reader/v<version>` and
+builds nothing.
 
 ## Checks
 
@@ -116,7 +126,8 @@ builds the tag's image, `ghcr.io/orchard-suite/muster:<version>` for
 make check
 ```
 
-It runs gofmt, `go vet`, `go test`, and the expression check, which proves
+It runs gofmt, `go vet`, `go test` for the service and the reader module,
+and the expression check, which proves
 every calculation with Orrery's own code. That last step needs an Orrery
 checkout with its dependencies installed, `../orrery` by default
 (`make check ORRERY=<path>` for another). CI checks out the Orrery commit

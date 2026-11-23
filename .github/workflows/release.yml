@@ -28,9 +28,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     outputs:
-      released: ${{ steps.release.outputs.released }}
-      tag: ${{ steps.release.outputs.tag }}
-      version: ${{ steps.release.outputs.version }}
+      # The service's own tag (v1.2.3); empty when only the reader released.
+      tag: ${{ steps.service.outputs.tag }}
     steps:
       # The branch tip, not the pushed commit: a run queued behind another
       # release must see that release's version commit and tags.
@@ -43,10 +42,21 @@ jobs:
         with:
           since-last-release: 'true'
           publish: 'true'
+      # The reader module releases on its own, tagged reader/v1.2.3 for Go.
+      # Only the service's bare tag builds an image.
+      - id: service
+        env:
+          TAGS: ${{ steps.release.outputs.tags }}
+        run: |
+          tag=""
+          for t in $TAGS; do
+            case "$t" in v*) tag=$t ;; esac
+          done
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
   build:
     needs: version
-    if: needs.version.outputs.released == 'true'
+    if: needs.version.outputs.tag != ''
     permissions:
       contents: read
       packages: write

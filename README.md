@@ -245,6 +245,44 @@ with the Reader role on it. Give the application that role on each project's
 environments (Pipelines, Environments, Security), or the project's
 deployments are not read.
 
+## The machine reader
+
+`reader/` is a Go module of its own, `github.com/orchard-suite/muster/reader`,
+with nothing beyond the standard library and `git` on the path. Tender, the
+suite's device agent, carries it: it walks a machine's folders for git
+checkouts and reports the work that has not left the machine.
+
+```go
+r, err := reader.Read(ctx, reader.Config{Roots: []string{"~/source"}, Ignore: []string{"vendor"}})
+```
+
+It only reads: it never fetches, and every git call runs with
+`GIT_OPTIONAL_LOCKS=0`, so it never takes the index lock from a commit
+running at the same moment. It walks every root, hidden folders included,
+follows no links, and skips each folder an `Ignore` glob matches by its
+name or the end of its path, and `node_modules`, unless one is named as a
+root. A folder holding `.git` is a checkout, and nothing in it is walked. A
+linked worktree, wherever it sits, counts under the repository it belongs
+to.
+
+The report, version 1 (`reader.Version`), has one entry per repository:
+
+| Field | What it holds |
+| --- | --- |
+| `remote` | The fetch URL of `origin`, else of the first remote, as `host/owner/name` in lower case, with no scheme, user, port, or `.git`. Azure DevOps is written `dev.azure.com/<org>/<project>/_git/<repo>` however it was cloned. Empty when the repository has no remote on a host. |
+| `folder` | The main worktree's folder name, and nothing above it. |
+| `worktrees` | Its worktrees on disk. |
+| `staged`, `modified`, `untracked`, `conflicted` | Files in each state, summed over its worktrees. |
+| `stashes` | Its stashes. |
+| `branches` | Each local branch: `name`, `ahead` and `behind` its upstream, `unpushed` (commits no remote-tracking ref holds), `upstream` (such as `origin/main`, empty when none is set), and `upstream_gone`. |
+
+It never holds a file's name, a path above the folder, a commit message, or
+a file's contents.
+
+The module is versioned on its own. A `feat` or `fix` scoped `reader`
+releases it, tagged `reader/v<version>` by the release workflow, so Go
+takes it as `go get github.com/orchard-suite/muster/reader@v<version>`.
+
 ## Running it
 
 ```bash
