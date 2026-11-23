@@ -1,0 +1,99 @@
+name: Build
+
+# The release workflow calls this with the new tag. It publishes the image, tagged with the version, to
+# ghcr.io/orchard-suite/redgreen. The GitHub Container Registry package is public, so a cluster pulls it without a
+# secret; pin it by digest. The image is signed with cosign keyless as this workflow's GitHub identity, with a
+# syft SBOM attested to it.
+# The tag must match the version in VERSION; that file is the source of truth.
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+
+env:
+  GHCR: ghcr.io/orchard-suite
+  IMAGE: redgreen
+
+permissions:
+  contents: read
+  packages: write
+  # Needed to get an OIDC token for keyless signing.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Check the tag matches VERSION
+        id: version
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          version=$(sed 's/ .*//' VERSION)
+          if [ "v$version" != "$TAG" ]; then
+            echo "Tag $TAG does not match VERSION $version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        id: push
+        with:
+          context: .
+          platforms: linux/amd64
+          # By digest only: the tags come last, once the image is signed.
+          outputs: type=image,name=${{ env.GHCR }}/${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - uses: sigstore/cosign-installer@v3
+      - uses: anchore/sbom-action/download-syft@v0
+      # Sign and attest by digest, never by tag: a tag can move.
+      - name: Sign the image
+        env:
+          REF: ${{ env.GHCR }}/${{ env.IMAGE }}@${{ steps.push.outputs.digest }}
+        run: cosign sign --yes "$REF"
+      - name: Attest the SBOM
+        env:
+          REF: ${{ env.GHCR }}/${{ env.IMAGE }}@${{ steps.push.outputs.digest }}
+        run: |
+          syft "$REF" -o spdx-json > sbom.spdx.json
+          cosign attest --yes --predicate sbom.spdx.json --type spdxjson "$REF"
+      - name: Verify what was published
+        env:
+          REF: ${{ env.GHCR }}/${{ env.IMAGE }}@${{ steps.push.outputs.digest }}
+        run: |
+          cosign verify "$REF" \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp '^https://github.com/${{ github.repository }}/'
+          cosign verify-attestation "$REF" --type spdxjson \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            --certificate-identity-regexp '^https://github.com/${{ github.repository }}/' > /dev/null
+      # Last: whatever follows the version tags sees one only once the image
+      # it names is signed and verified.
+      - name: Tag the version
+        run: |
+          tag() {
+            ref=$1; shift
+            for t in "$@"; do
+              docker buildx imagetools create --tag "$t" "$ref"
+              got=$(docker buildx imagetools inspect "$t" --format '{{json .Manifest.Digest}}' | tr -d '"')
+              [ "$got" = "${ref#*@}" ] || { echo "$t is $got, not the signed ${ref#*@}" >&2; exit 1; }
+            done
+          }
+          tag "${{ env.GHCR }}/${{ env.IMAGE }}@${{ steps.push.outputs.digest }}" "${{ env.GHCR }}/${{ env.IMAGE }}:${{ steps.version.outputs.version }}"

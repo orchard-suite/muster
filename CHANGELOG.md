@@ -1,0 +1,324 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [0.2.7](https://github.com/orchard-suite/redgreen/compare/v0.2.6...v0.2.7) (2026-10-16)
+
+
+### Features
+
+* detect readme, dockerfile, tests per service ([b1cfa92](https://github.com/orchard-suite/redgreen/commit/b1cfa92c8ea8ff10c75443489b9106e604e028d4))
+* read gitlab repository facts ([8be59ab](https://github.com/orchard-suite/redgreen/commit/8be59ab2c4ce587010871e064dc76119c7cbd6ca))
+
+### [0.2.6](https://github.com/orchard-suite/redgreen/compare/v0.2.5...v0.2.6) (2026-10-14)
+
+
+### Features
+
+* publish the image to the github registry ([dfe5a82](https://github.com/orchard-suite/redgreen/commit/dfe5a824067d0f9d279c27faaf066d990a62fcaa))
+* stamp services with who last changed them ([bb87890](https://github.com/orchard-suite/redgreen/commit/bb878904a1ab2b3f0817d3017afab803bc10c17b))
+
+### [0.2.5](https://github.com/orchard-suite/redgreen/compare/v0.2.4...v0.2.5) (2026-10-12)
+
+
+### Features
+
+* stamp services with their folder's last change ([9a1abf8](https://github.com/orchard-suite/redgreen/commit/9a1abf801d48e1832b35f6f96364b1b3a571a4e9))
+
+### [0.2.4](https://github.com/orchard-suite/redgreen/compare/v0.2.3...v0.2.4) (2026-10-08)
+
+
+### Bug Fixes
+
+* sign in again when the sign-in has ended ([a484f06](https://github.com/orchard-suite/redgreen/commit/a484f068265cf6549f271b7ce440c44bdb0e0b71))
+
+### [0.2.3](https://github.com/orchard-suite/redgreen/compare/v0.2.2...v0.2.3) (2026-10-06)
+
+
+### Features
+
+* push the services found in each repo ([f440c77](https://github.com/orchard-suite/redgreen/commit/f440c7701ab122e5a11b9f4c58c56e2ae99ede17))
+
+### [0.2.2](https://github.com/orchard-suite/redgreen/compare/v0.2.1...v0.2.2) (2026-10-05)
+
+
+### Bug Fixes
+
+* read a gitlab project with features off ([d109845](https://github.com/orchard-suite/redgreen/commit/d109845f8a16e8a401e92eaefe644c5db6641dfd))
+
+### [0.2.1](https://github.com/orchard-suite/redgreen/compare/v0.2.0...v0.2.1) (2026-10-05)
+
+
+### Features
+
+* add azure devops provider ([1bf5b28](https://github.com/orchard-suite/redgreen/commit/1bf5b282af51ac59b79615b83d8fac19961e285a))
+* one language list and open fields ([dafe517](https://github.com/orchard-suite/redgreen/commit/dafe5174f0f73ab5ec834e686569882f91c35749))
+* push forge deployments to orrery ([185abff](https://github.com/orchard-suite/redgreen/commit/185abff406076d4b4a343b502ade925caf96625e))
+
+## [1.12.2](https://github.com/orchard-suite/redgreen/compare/v1.12.1...v1.12.2) (2026-11-22)
+
+### Bug Fixes
+
+* **redgreen:** tag the image only after signing ([625b53a](https://github.com/orchard-suite/redgreen/commit/625b53a5fcbd634afcee759096d7f608eddb913a))
+
+## [1.12.1](https://github.com/orchard-suite/redgreen/compare/v1.12.0...v1.12.1) (2026-11-21)
+
+### Bug Fixes
+
+* **redgreen:** make each described folder a service ([64bfc51](https://github.com/orchard-suite/redgreen/commit/64bfc51375d743d017a2c904c4c06e349445c874))
+
+## [1.12.0](https://github.com/orchard-suite/redgreen/compare/v1.11.0...v1.12.0) (2026-11-20)
+
+### Features
+
+* **redgreen:** link argo cd apps to hub services ([09054eb](https://github.com/orchard-suite/redgreen/commit/09054ebeeebbe6458c6648ae16f141ecfccac1d8))
+
+## [1.11.0](https://github.com/orchard-suite/redgreen/compare/v1.10.0...v1.11.0) (2026-11-20)
+
+### Features
+
+* **redgreen:** link argo cd apps in its settings ([c83ebe1](https://github.com/orchard-suite/redgreen/commit/c83ebe166edb7c5d1808262a38458fc62d39b9f9))
+
+## [1.10.0](https://github.com/orchard-suite/redgreen/compare/v1.9.0...v1.10.0) (2026-11-20)
+
+### Features
+
+* **redgreen:** tie deployments to their services ([4adb53a](https://github.com/orchard-suite/redgreen/commit/4adb53a2e6c446276489a28a028acee765381d7b))
+
+## [1.9.0](https://github.com/orchard-suite/redgreen/compare/v1.8.0...v1.9.0) (2026-11-19)
+
+### Features
+
+* **redgreen:** probe paths an estate names ([34d7b7c](https://github.com/orchard-suite/redgreen/commit/34d7b7cfbba158255df8b6553d067f2b7788b31d))
+
+## [1.8.0](https://github.com/orchard-suite/redgreen/compare/v1.7.4...v1.8.0) (2026-11-19)
+
+### Features
+
+* **redgreen:** read connections from config files ([e5e6327](https://github.com/orchard-suite/redgreen/commit/e5e6327d32331de6db551fc309f85f4afcdcde7f))
+
+## [1.7.4](https://github.com/orchard-suite/redgreen/compare/v1.7.3...v1.7.4) (2026-11-18)
+
+### Bug Fixes
+
+* **redgreen:** keep declared fields through sweeps ([09b02a5](https://github.com/orchard-suite/redgreen/commit/09b02a52af7f2c9a402dc1d3dce9f8c17081f992))
+
+## [1.7.3](https://github.com/orchard-suite/redgreen/compare/v1.7.2...v1.7.3) (2026-11-17)
+
+### Bug Fixes
+
+* **redgreen:** keep classic web apps as apps ([b40f6b5](https://github.com/orchard-suite/redgreen/commit/b40f6b50f1098b0a09374b754c16076e4e221165))
+
+## [1.7.2](https://github.com/orchard-suite/redgreen/compare/v1.7.1...v1.7.2) (2026-11-17)
+
+### Bug Fixes
+
+* **redgreen:** skip libraries, testers, and copies ([439432f](https://github.com/orchard-suite/redgreen/commit/439432ffd300eca64cdf7b2ffb1b8ac2b8fcfe84))
+
+## [1.7.1](https://github.com/orchard-suite/redgreen/compare/v1.7.0...v1.7.1) (2026-11-16)
+
+### Bug Fixes
+
+* **redgreen:** drop every copy the hub holds of it ([1ec6095](https://github.com/orchard-suite/redgreen/commit/1ec609573c6740b42c8f8bd3517cd16a332baac0))
+
+## [1.7.0](https://github.com/orchard-suite/redgreen/compare/v1.6.0...v1.7.0) (2026-11-16)
+
+### Features
+
+* **redgreen:** leave a job another source reports ([986d801](https://github.com/orchard-suite/redgreen/commit/986d80106ffbef6598413c0e6fc5fa622fda0d99))
+
+## [1.6.0](https://github.com/orchard-suite/redgreen/compare/v1.5.4...v1.6.0) (2026-11-16)
+
+### Features
+
+* **redgreen:** judge flaky by runs, not days ([eeb34bc](https://github.com/orchard-suite/redgreen/commit/eeb34bc7b480c0c1401d029ef81405f0a0a12e31))
+
+## [1.5.4](https://github.com/orchard-suite/redgreen/compare/v1.5.3...v1.5.4) (2026-11-16)
+
+### Bug Fixes
+
+* **redgreen:** read newest gitlab schedule runs ([8609dc9](https://github.com/orchard-suite/redgreen/commit/8609dc9902224f90294077ac7d95ee14caad7c63))
+
+## [1.5.3](https://github.com/orchard-suite/redgreen/compare/v1.5.2...v1.5.3) (2026-11-15)
+
+### Bug Fixes
+
+* **redgreen:** send unchanged entities by digest ([f976fc5](https://github.com/orchard-suite/redgreen/commit/f976fc5ebd36ef6ae266e9b6d179964d39399866))
+
+## [1.5.2](https://github.com/orchard-suite/redgreen/compare/v1.5.1...v1.5.2) (2026-11-14)
+
+### Bug Fixes
+
+* **redgreen:** send orrery's tag back on each read ([e644869](https://github.com/orchard-suite/redgreen/commit/e644869d912dc59988668a5501bf1e157bdb0198))
+
+## [1.5.1](https://github.com/orchard-suite/redgreen/compare/v1.5.0...v1.5.1) (2026-11-13)
+
+### Bug Fixes
+
+* **redgreen:** title the red and amber pipeline counts ([b8077da](https://github.com/orchard-suite/redgreen/commit/b8077da85e89bb5da14820e3bb617213d7505cb2))
+
+## [1.5.0](https://github.com/orchard-suite/redgreen/compare/v1.4.2...v1.5.0) (2026-11-13)
+
+### Features
+
+* **redgreen:** read deployments from azure devops ([1a32ed9](https://github.com/orchard-suite/redgreen/commit/1a32ed9fca68530cc2eecb3d53cbab3c112e8040))
+
+### Bug Fixes
+
+* **redgreen:** follow orrery's moved expressions ([e59be93](https://github.com/orchard-suite/redgreen/commit/e59be931170d44127708981b4b5aac9470e7dc3e))
+
+## [1.4.2](https://github.com/orchard-suite/redgreen/compare/v1.4.1...v1.4.2) (2026-11-12)
+
+### Bug Fixes
+
+* **redgreen:** ask the hub only for what outcomes map ([a7a5912](https://github.com/orchard-suite/redgreen/commit/a7a5912dbc7c516ffb8b3f3cbf2c03d910a8e38f))
+
+## [1.4.1](https://github.com/orchard-suite/redgreen/compare/v1.4.0...v1.4.1) (2026-11-09)
+
+### Bug Fixes
+
+* **redgreen:** read an orrery.yaml beside each service ([3a6f366](https://github.com/orchard-suite/redgreen/commit/3a6f36641bf5344f2c5931e1d90a9304b2dba27e))
+
+## [1.4.0](https://github.com/orchard-suite/redgreen/compare/v1.3.1...v1.4.0) (2026-11-09)
+
+### Features
+
+* **redgreen:** describe services from orrery.yaml ([8a6d498](https://github.com/orchard-suite/redgreen/commit/8a6d498831b2824dc1e965240fc3a48338eaec48))
+
+## [1.3.1](https://github.com/orchard-suite/redgreen/compare/v1.3.0...v1.3.1) (2026-11-09)
+
+### Bug Fixes
+
+* anchor delivery measures to days and weeks ([401d9bf](https://github.com/orchard-suite/redgreen/commit/401d9bf882c5eaa39e1f8360a988c9b40efc1d20))
+
+## [1.3.0](https://github.com/orchard-suite/redgreen/compare/v1.2.0...v1.3.0) (2026-11-08)
+
+### Features
+
+* read ci jobs from gitlab and azure devops ([0e34f5e](https://github.com/orchard-suite/redgreen/commit/0e34f5e05f39dbf95ff4ec5661bcd4eeb219d0c9))
+
+## [1.2.0](https://github.com/orchard-suite/redgreen/compare/v1.1.1...v1.2.0) (2026-11-08)
+
+### Features
+
+* measure ci jobs on every kind of runner ([886b618](https://github.com/orchard-suite/redgreen/commit/886b618091cac65525d4af47467998bf6d2394cf))
+
+## [1.1.1](https://github.com/orchard-suite/redgreen/compare/v1.1.0...v1.1.1) (2026-11-08)
+
+### Bug Fixes
+
+* give each terraform root its own service ([0a2b857](https://github.com/orchard-suite/redgreen/commit/0a2b857d0b5c15e67957c612229196cecdcf4a97))
+
+## [1.1.0](https://github.com/orchard-suite/redgreen/compare/v1.0.1...v1.1.0) (2026-11-07)
+
+### Features
+
+* carry gitlab and azure devops from an old store ([664141f](https://github.com/orchard-suite/redgreen/commit/664141fda3ee95886f3727e0babf80566742cb53))
+* keep the delivery measures' history ([f70a049](https://github.com/orchard-suite/redgreen/commit/f70a049336a42c19d87abba1402ce0930ea7fee2))
+
+## [1.0.1](https://github.com/orchard-suite/redgreen/compare/v1.0.0...v1.0.1) (2026-11-07)
+
+### Bug Fixes
+
+* quiet the pipelines of a muted repository ([6e0b695](https://github.com/orchard-suite/redgreen/commit/6e0b695b3c5d1244efbb09888013250f1fbfd646))
+
+## [1.0.0](https://github.com/orchard-suite/redgreen/compare/v0.2.19...v1.0.0) (2026-11-07)
+
+### ⚠ BREAKING CHANGES
+
+* rebuild redgreen as a headless go service ([350baa1](https://github.com/orchard-suite/redgreen/commit/350baa104dd64195e34e1e0d12a94b1b15b0083a))
+
+### Features
+
+* rebuild redgreen as a headless go service ([350baa1](https://github.com/orchard-suite/redgreen/commit/350baa104dd64195e34e1e0d12a94b1b15b0083a))
+* check calculations with orrery's compiler ([f594561](https://github.com/orchard-suite/redgreen/commit/f5945610557ef94aacdf62ffda840d48e42021d3))
+
+### Bug Fixes
+
+* keep a repository with no pipelines quiet ([47b3ef6](https://github.com/orchard-suite/redgreen/commit/47b3ef6fab15c6c3bb659d8832e82b9d73ace24c))
+
+## [0.2.19](https://github.com/orchard-suite/redgreen/compare/v0.2.18...v0.2.19) (2026-11-04)
+
+### Bug Fixes
+
+* call orrery under /v1 ([2a6665f](https://github.com/orchard-suite/redgreen/commit/2a6665ffca5e747db987c33cdf01425ab1de3c22))
+
+## [0.2.18](https://github.com/orchard-suite/redgreen/compare/v0.2.17...v0.2.18) (2026-11-04)
+
+### Features
+
+* carry each repo's own logo to orrery ([2e8a21f](https://github.com/orchard-suite/redgreen/commit/2e8a21fff934cc5262da2d1597239610555b7ea1))
+
+## [0.2.17](https://github.com/orchard-suite/redgreen/compare/v0.2.16...v0.2.17) (2026-11-02)
+
+### Bug Fixes
+
+* sign the image and attest its sbom ([cc4999e](https://github.com/orchard-suite/redgreen/commit/cc4999ea6283088a64b12c3027d21da35d8cf101))
+
+## [0.2.16](https://github.com/orchard-suite/redgreen/compare/v0.2.15...v0.2.16) (2026-11-02)
+
+### Features
+
+* write orrery under the standard blueprint ids ([2d67912](https://github.com/orchard-suite/redgreen/commit/2d67912f831cd0bc2cde82302ea14488914cc778))
+
+## [0.2.15](https://github.com/orchard-suite/redgreen/compare/v0.2.14...v0.2.15) (2026-11-01)
+
+### Features
+
+* describe redgreen itself to orrery ([3d98650](https://github.com/orchard-suite/redgreen/commit/3d986508b5d4ecf1ca1775f50761ba6063b3aea9))
+
+## [0.2.14](https://github.com/orchard-suite/redgreen/compare/v0.2.13...v0.2.14) (2026-11-01)
+
+### Features
+
+* count incidents from dispatch ([fde43ed](https://github.com/orchard-suite/redgreen/commit/fde43edefaae1407d9691867d188c9b3729dea31))
+
+## [0.2.13](https://github.com/orchard-suite/redgreen/compare/v0.2.12...v0.2.13) (2026-10-31)
+
+### Features
+
+* add outcomes, the four dora measures ([4480d2f](https://github.com/orchard-suite/redgreen/commit/4480d2fc9b500745ab3873987bd0617ba1be6e0c))
+
+## [0.2.12](https://github.com/orchard-suite/redgreen/compare/v0.2.11...v0.2.12) (2026-10-27)
+
+### Bug Fixes
+
+* count a .invalid address as a bot ([4c2ba31](https://github.com/orchard-suite/redgreen/commit/4c2ba31dde0f392bcc70eb8602e9f515ebd745ef))
+
+## [0.2.11](https://github.com/orchard-suite/redgreen/compare/v0.2.10...v0.2.11) (2026-10-27)
+
+### Features
+
+* push the commit author address beside the name ([77571c0](https://github.com/orchard-suite/redgreen/commit/77571c0127f35af156ee10e53cc8040ddb251340))
+
+## [0.2.10](https://github.com/orchard-suite/redgreen/compare/v0.2.9...v0.2.10) (2026-10-23)
+
+### Bug Fixes
+
+* reset the http cache by copy, not drop ([2f38c55](https://github.com/orchard-suite/redgreen/commit/2f38c551168c438afd2c185bfe8fdd0c37c553e5))
+
+## [0.2.9](https://github.com/orchard-suite/redgreen/compare/v0.2.8...v0.2.9) (2026-10-23)
+
+### Bug Fixes
+
+* keep the http cache small and indexed ([76bbb6c](https://github.com/orchard-suite/redgreen/commit/76bbb6ce7b6347524ac799a2354ca01d3cb3ed83))
+
+## [0.2.8](https://github.com/orchard-suite/redgreen/compare/v0.2.7...v0.2.8) (2026-10-22)
+
+### Features
+
+* push last human change beside last change ([0e04301](https://github.com/orchard-suite/redgreen/commit/0e043014c453826f8357a4ad683cb8ac73fd36d7))
+
+## [0.2.0](https://github.com/orchard-suite/redgreen/compare/v0.1.2...v0.2.0) (2026-10-01)
+
+
+### Features
+
+* push every repo to an orrery hub as a repository, with branch rules, last commit, and repo facts; the repository blueprint is offered to the hub first
+
+### [0.1.2](https://github.com/orchard-suite/redgreen/compare/v0.1.1...v0.1.2) (2026-09-30)
+
+
+### Features
+
+* add gitlab provider with oauth setup ([ee368f0](https://github.com/orchard-suite/redgreen/commit/ee368f01245fa2f40544c0e12f26158c7bc214ac))

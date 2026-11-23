@@ -1,0 +1,123 @@
+# redgreen
+
+The forges' door into Orrery. Read `README.md` first.
+
+This repository is public and estate-neutral. Every name in a test, an
+example, or a doc comes from the fixture world:
+https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
+
+## Shape
+
+- A headless Go service. Orrery is the board and the math; redgreen watches
+  the forges and writes facts. It never stores what Orrery stores and never
+  computes what Orrery can compute when a page is read.
+- `cmd/redgreen` is the command: `serve`, `setup github`, `setup gitlab`, and
+  `import-history`. Nothing else lives there but wiring.
+- `internal/provider` is the neutral model (`model.go`) and the `Provider`
+  interface. One package per forge under it (`github`, `gitlab`,
+  `azuredevops`). Nothing outside a forge's package knows its JSON. Adding a
+  forge means adding a package and listing it in `cmd/redgreen/serve.go`.
+- Every forge read goes through `provider.Get`, the conditional request: it
+  sends back the ETag, and a 304 reuses the facts kept from the first answer.
+  `provider.Once` is for an answer never asked for again, such as a tree at
+  one commit: it keeps nothing. Never call a forge around them.
+- `internal/state` is the SQLite file (pure Go, `modernc.org/sqlite`). It
+  keeps facts, never raw bodies: per URL the ETag and the normalised facts,
+  webhook delivery ids, runs for 60 days, forge deployments and the commits
+  each carried for 200 days, open issues, services per repository, and a
+  hash of what was last written. Losing it costs one sweep.
+- `internal/catalog` is what Orrery gets. `blueprints.go` offers the
+  blueprints; `expressions.go` holds every calculation and is the only place
+  one is written; `health.go` works out what only the runs can tell (a
+  failing streak, a missed schedule, a failed release build, a flaky
+  commit); `entities.go` maps a read onto entities. A field written must be
+  defined in its blueprint, and a calculation reads only fields before it
+  (`blueprints_test.go` checks both).
+- `internal/outcomes` works out each deployment's lead time, commit count,
+  fix-only flag, failed change, and restore time. Orrery aggregates them per
+  service and per team. A forge job another source already reports with its
+  job address (`Reported`, `HandOver`) is that source's deployment: redgreen
+  enriches it, deletes every copy the hub holds under its own name, and
+  writes none. `attribute.go` is the only place a deployment is placed on a
+  service (`Attribute` for forge deployments, `MapSyncs` for Argo CD syncs);
+  it runs on every pass over the deployments kept for the window, so a rule
+  change places old deployments too. An Argo CD app is placed first by what
+  someone says: the operator's `ARGOCD_SERVICES` link, which wins, or a
+  service's `deploys.argocd`. A service's repository never names an
+  estate's GitOps repository; the operator's setting does. A deployment of several services is
+  one record per service, keyed `<key>@<service folder>` past the first; a
+  pipeline deployment is keyed `<service>@run-<id>`. redgreen deletes a key
+  of its own shape that it no longer makes. `orrery.go` reads Argo CD syncs,
+  apps, workloads, `it_incident`, and the services an `ARGOCD_SERVICES` link
+  may name, back from Orrery with `ORRERY_READ_TOKEN`; a workload's `repo`
+  URL, read by `repourl.go`, places a sync or an incident in a repository
+  and folder, and an incident's `service` relation places it on that
+  service. A link may name a service only the hub holds: its syncs carry no
+  commits, so redgreen never guesses their lead time. Each page of a hub list goes through `provider.Get` like a forge
+  read, so an unchanged page is a 304. A question must read the same from one
+  cycle to the next, or its tag never matches: a time in a filter is asked by
+  the day (`since`) and trimmed to the moment in Go.
+- `internal/services` finds services from the files that build them. `Detect`
+  is the only place a service is recognised. Bump `Rules` with any change to
+  a rule, so every repository is read again. `Read` reads every
+  `orrery.yaml` before it detects: a folder one names is a bound, read by
+  the rules as a repository of its own, so a described folder is always one
+  service.
+- `internal/jobs` follows CI jobs, from GitHub's `workflow_job` webhook and
+  from each GitLab and Azure DevOps sync (`provider.JobReader`), for
+  telemetry only: jobs waiting and running, wait and run times. Nothing in
+  it reaches Orrery.
+- `internal/sync` is the engine: the sweep, the workers, webhooks, and the
+  writes. `internal/services/descriptor.go` reads a repository's
+  `orrery.yaml`; it is the only reader of one. An app never writes its own
+  description: redgreen reads its own file from its repository like any
+  other. `connections.go` and `endpoints.go` read the config files beside
+  each service and keep host and database names only; no value ever leaves
+  them.
+  `internal/telemetry` is logs, traces, and metrics.
+
+## Rules
+
+- Health and DORA are Orrery calculations and aggregations. Never compute a
+  status, a rate, or a band in Go; push the fact and let the blueprint say
+  what it means. Run `scripts/check-expressions.mts` after changing one.
+- A blueprint offered to a hub that already has it only adds what it lacks.
+  A changed field definition or a new `status.field` does not reach that hub;
+  say so in the commit.
+- Health and push run on goroutines. `/healthz` never touches the state or a
+  forge.
+- Logs are JSON lines on stdout. Log both branches of any decision that
+  changes what Orrery shows.
+- Accounts sync only when allowed: `GITHUB_ALLOWED_ACCOUNTS`,
+  `GITLAB_ALLOWED_ACCOUNTS`, or the organisations `AZURE_DEVOPS_ORGANIZATIONS`
+  names. Keep that gate; the GitHub App is public so it installs on several
+  orgs.
+- Forge tokens are renewed inside their provider and never cached elsewhere.
+  GitLab replaces its refresh token on every use, so the newest is kept in
+  the state, sealed with `SECRET_KEY`.
+- A service is written with what the files say: its folder, kind, language,
+  README, Dockerfile, tests, and icon. What people decide about it is never
+  pushed; a pushed value would fight their edits.
+- `VERSION` is the version of record.
+
+## Delivery
+
+Agents push to main and land with `make land` (`make land BRANCH=<branch>`
+from a worktree): it runs `make check`, then `release-damnit land`. CI runs
+the same check on every pull request and before every release, then
+versions every `feat` and `fix` since the last release tag, tags it, and
+builds the tag's image, `ghcr.io/orchard-suite/redgreen:<version>` for
+`linux/amd64`, signed with cosign. Never edit `VERSION`, the manifest, or
+`CHANGELOG.md` by hand.
+
+## Checks
+
+```bash
+make check
+```
+
+It runs gofmt, `go vet`, `go test`, and the expression check, which proves
+every calculation with Orrery's own code. That last step needs an Orrery
+checkout with its dependencies installed, `../orrery` by default
+(`make check ORRERY=<path>` for another). CI checks out the Orrery commit
+`go.mod` requires. Run it before every commit; `make land` runs it again.

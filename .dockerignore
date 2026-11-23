@@ -1,0 +1,9 @@
+.git
+.github
+.claude
+data
+logs
+scripts
+*.md
+**/*_test.go
+**/testdata

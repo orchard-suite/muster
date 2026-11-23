@@ -1,0 +1,9 @@
+data/
+logs/
+*.log
+.env
+.env.*
+CLAUDE.md
+.claude/
+/redgreen
+blueprints.check.json

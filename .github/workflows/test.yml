@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  pull_request:
+  # The release calls this first, so a push to main runs it once.
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      # The expression check runs against the Orrery commit go.mod requires,
+      # so the calculations are proved by the code redgreen builds against.
+      - name: Check out Orrery at the version go.mod requires
+        run: |
+          version=$(go list -m -f '{{.Version}}' github.com/orchard-suite/orrery)
+          commit=${version##*-}
+          case "$version" in *-*-*) ;; *) commit=$version ;; esac
+          git clone --filter=blob:none --quiet https://github.com/orchard-suite/orrery "$RUNNER_TEMP/orrery"
+          git -C "$RUNNER_TEMP/orrery" checkout --quiet "$commit"
+          echo "ORRERY=$RUNNER_TEMP/orrery" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install Orrery's dependencies
+        working-directory: ${{ env.ORRERY }}
+        run: npm ci --ignore-scripts
+      - run: make check
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          platforms: linux/amd64
