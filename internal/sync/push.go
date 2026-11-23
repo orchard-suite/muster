@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"maps"
+	"slices"
 	"strings"
 	gosync "sync"
 	"time"
@@ -21,16 +22,37 @@ import (
 
 // offer brings the blueprints once per start. A blueprint the hub refuses is
 // not written; the whole offer is tried again on the next push when it failed.
+// Each extra is offered on its own, because it reaches a blueprint the estate
+// may not have; a refused one is left out of what is written.
 type offer struct {
 	client  *sdk.Client
 	log     *slog.Logger
+	extras  map[string]sdk.Blueprint
 	mu      gosync.Mutex
 	done    bool
 	refused map[string]bool
 }
 
+// Extras an offer brings besides the core, by the name ready answers them under.
+const (
+	extraTeamDORA        = "team DORA fields"
+	extraCheckoutMachine = "checkout machine link"
+	extraCheckoutOwner   = "checkout owner link"
+)
+
+func newOffer(client *sdk.Client, log *slog.Logger, links CheckoutOptions) *offer {
+	extras := map[string]sdk.Blueprint{extraTeamDORA: catalog.TeamDORA()}
+	if links.MachineBlueprint != "" {
+		extras[extraCheckoutMachine] = catalog.CheckoutMachineBlueprint(links.MachineBlueprint)
+	}
+	if links.PersonBlueprint != "" {
+		extras[extraCheckoutOwner] = catalog.CheckoutOwnerBlueprint(links.PersonBlueprint)
+	}
+	return &offer{client: client, log: log, extras: extras}
+}
+
 // ready offers the blueprints when they have not been taken yet, and says
-// which ones may be written.
+// which blueprints, and which extras by name, may be written.
 func (o *offer) ready(ctx context.Context) (func(string) bool, bool) {
 	if o.client == nil {
 		return nil, false
@@ -38,8 +60,7 @@ func (o *offer) ready(ctx context.Context) (func(string) bool, bool) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	if !o.done {
-		core := catalog.Blueprints()
-		res, err := o.client.OfferBlueprints(ctx, core[:len(core)-1])
+		res, err := o.client.OfferBlueprints(ctx, catalog.Core())
 		if res == nil {
 			o.log.ErrorContext(ctx, "orrery blueprint offer failed; tried again on the next push", "error", err)
 			return nil, false
@@ -49,15 +70,18 @@ func (o *offer) ready(ctx context.Context) (func(string) bool, bool) {
 			refused[r.Blueprint] = true
 			o.log.ErrorContext(ctx, "orrery refused a blueprint; its entities are not written", "blueprint", r.Blueprint, "reason", r.Reason)
 		}
-		// A team's DORA reads the standard's sw_service.team, which an estate may not have.
-		if _, err := o.client.OfferBlueprints(ctx, []sdk.Blueprint{catalog.TeamDORA()}); err != nil {
-			o.log.WarnContext(ctx, "orrery refused the team DORA fields; teams go without them", "error", err)
+		names := slices.Sorted(maps.Keys(o.extras))
+		for _, name := range names {
+			if _, err := o.client.OfferBlueprints(ctx, []sdk.Blueprint{o.extras[name]}); err != nil {
+				refused[name] = true
+				o.log.WarnContext(ctx, "orrery refused an extra; it is left out", "extra", name, "error", err)
+			}
 		}
 		o.done, o.refused = true, refused
 		o.log.InfoContext(ctx, "orrery blueprints offered", "created", res.Created, "extended", res.Extended, "kept", res.Kept, "refused", len(refused))
 	}
 	refused := o.refused
-	return func(bp string) bool { return !refused[bp] }, true
+	return func(name string) bool { return !refused[name] }, true
 }
 
 func accountScope(a provider.Account) string {

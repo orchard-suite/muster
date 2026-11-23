@@ -1,26 +1,31 @@
 # Muster
 
-Muster watches GitHub, GitLab, and Azure DevOps and writes what it finds
-into an [Orrery](https://github.com/orchard-suite/orrery) catalog: repositories,
-pipelines, services, deployments, and issues. Orrery is the board and the
+Muster answers where the code is and what state it is in. It watches
+GitHub, GitLab, and Azure DevOps and writes what it finds into an
+[Orrery](https://github.com/orchard-suite/orrery) catalog: repositories,
+pipelines, services, deployments, and issues. It also takes what each
+machine reports, through Tender, the suite's device agent, about work that
+has not left it, and writes it as checkouts beside the repositories. Orrery
+is the board and the
 math. Health and the four DORA measures are calculations and aggregations in
 the blueprints Muster offers, so Orrery works them out when a page is read,
 and changing a rule never needs a resync.
 
 Muster has no web interface. It is one Go binary with a small SQLite state
-that can be rebuilt by one sweep.
+that one sweep, and each machine's next report, rebuild.
 
 ## What it writes
 
 | Blueprint | Kind | What it carries |
 | --- | --- | --- |
-| `sw_repository` | inventory | forge, account, default branch, archived, visibility, language, last push, branch protection, alert counts, pull requests failing checks, days idle, which `PROBE_PATHS` exist (`paths_present`), the health rules, and a calculated `status` with `status_reason` |
+| `sw_repository` | inventory | forge, account, default branch, archived, visibility, language, last push, branch protection, alert counts, pull requests failing checks, days idle, which `PROBE_PATHS` exist (`paths_present`), the health rules, a calculated `status` with `status_reason`, and `machines_with_unseen_work`, the machines whose checkout of it holds commits no remote has or files not committed |
 | `sw_pipeline` | inventory | one per workflow, build definition, or schedule: the latest default-branch run, schedule state, newest release build, 30-day success rate, median duration, a 60-day success trend, and a flaky flag. Runs stay on the forge. |
 | `sw_service` | inventory | each service found from the files that build it (folder, kind, language, icon, last human change, README, Dockerfile, tests), and its DORA measures. The one a repository's `orrery.yaml` describes also carries its logo, the APIs it calls (`consumes`, `will_consume`), and the fields and relations that place it in the estate's scheme. |
 | `sw_api` | inventory | each API a repository's `orrery.yaml` says its service provides: kind, description, and where its definition is read |
 | `sw_deployment` | history, kept 180 days | each deployment a forge recorded, one per service it rolled out, and each one a service's pipeline made where its orrery.yaml says so, with lead time, commits carried, fix only, failed change, and restore time. Argo CD syncs another source writes get the same fields and their service added, and so does a forge job another source already reports by its address: that source's entity is the deployment, and Muster keeps no copy of its own. |
 | `sw_issue` | record, kept 90 days after closing | open issues and pull requests on every forge, linked to their repository |
 | `sw_connection` | inventory | each host a service's config files name, per environment: host, resource name, database, kind, and the setting names, with evidence `code`. Names only, never a value. |
+| `sw_checkout` | inventory, one snapshot per device | one repository on one machine, from the machine's last report: its remote and folder, file counts, stashes, worktrees, unpushed commits, and each branch against its upstream; the device, its person, and its certificate's expiry with a status that turns amber 14 days before it runs out. Linked to its repository when Muster watches it, to the machine's record, and to the person as `owner`. Written only once the estate gives it an access rule. See "What a machine reports". |
 | `team` | fields only | the same DORA measures over a team's services, through the standard's `sw_service.team` |
 
 ### What a repository says about itself
@@ -245,6 +250,80 @@ with the Reader role on it. Give the application that role on each project's
 environments (Pipelines, Environments, Security), or the project's
 deployments are not read.
 
+## What a machine reports
+
+Tender, the suite's device agent, runs on each person's machine and carries
+Muster's reader (below). Muster serves the two calls Tender makes, behind the
+device door from platformkit's `device` package:
+
+- `GET /tender/v1/readers/muster` answers `{"accept": true, "version": 1,
+  "every": "15m"}`: the report version Muster takes and how often to send.
+- `POST /tender/v1/readers/muster` takes `{"reader": "muster", "version": 1,
+  "at": ..., "report": {...}}`. It answers `204` and keeps the report in place
+  of the device's last one, whole, so a post sent twice is kept once and a
+  late one never undoes a newer one. Another version is answered `409` with
+  `{"version": 1}`. A report that is not version 1, carries a field version 1
+  does not have, names a path, or holds a string longer than 512 bytes is
+  answered `400` and kept nowhere.
+
+The door lets a request in only with a fresh assertion the device signed
+with its certificate's key, for this address, method, and body, from a
+certificate the estate's device authority issued for client authentication
+and has not revoked. It names the device (the certificate's common name by
+default) and its person (the first email name, else the UPN). The door is
+off until the estate sets both `TENDER_AUDIENCE` and `DEVICE_CA_FILE`.
+
+Each kept report is written at once as that device's checkouts, one
+`sw_checkout` a repository, in a snapshot scoped `devices/<device id>`: a
+checkout gone from the report leaves the catalog. Every sweep writes every
+device's again, so a link that could not be made at a post is made then. Two
+clones of one remote on one machine are one checkout, their counts summed.
+A checkout links to:
+
+- `repository`, the `sw_repository` its remote names, when Muster watches
+  it. A remote on a forge Muster does not read, and a repository with no
+  remote, link to none.
+- `machine`, the record on `MACHINE_BLUEPRINT` (`it_workstation`) whose
+  `MACHINE_MATCH_FIELD` (`hostname`) is the device's name or id, or the part
+  of either before the first dot, ignoring case. A machine the catalog does
+  not hold leaves the checkout unlinked, with the device id in `device`.
+- `owner`, the record on `PERSON_BLUEPRINT` (`person`) whose
+  `PERSON_MATCH_FIELD` (`emails`, a list or one address) holds the device's
+  person.
+
+Each link is offered on its own, so a hub without the blueprint it points at
+refuses only that link, and the checkouts are written without it. Muster
+reads machines and people with `ORRERY_READ_TOKEN`.
+
+### Who reads a checkout
+
+A checkout says what sits on a person's machine, so only that person and
+the estate's admins read it. A hub drops an access rule a source offers,
+since who sees what is an admin's to say, so the estate sets it, and Muster
+writes no checkout until it has: on every pass it reads `sw_checkout` with
+`ORRERY_READ_TOKEN`, and while the blueprint has no access rule, or the
+token is not set, it keeps the reports and logs `checkouts held`. Reports
+taken meanwhile are written on the first pass after the rule is set.
+
+The rule that gives each checkout to its person alone, set by an admin on
+the hub, in two parts:
+
+1. The person setting's ownership paths include `<-owner` (as `owner`), so
+   a person owns what names them as its owner.
+2. `sw_checkout`'s access rule names nobody, and opens each entity to its
+   owners:
+
+   ```yaml
+   access:
+     grants: []
+     owners: { roles: [owner], fields: all }
+   ```
+
+An estate that wants wider readers adds grants or audiences to that rule
+before it turns the door on. The count on `sw_repository` reads checkouts a
+person may not see, so it is hidden from them unless an admin marks it a
+summary (`summary: true`), which shows the number and nothing it counts.
+
 ## The machine reader
 
 `reader/` is a Go module of its own, `github.com/orchard-suite/muster/reader`,
@@ -303,7 +382,13 @@ muster serve
 | `FLAKY_WINDOW_RUNS`, `FLAKY_CLEAR_RUNS`, `FLAKY_MAX_AGE_DAYS` | The flaky rule: finished runs read, 20; passes in a row that clear it, 5; days evidence counts, 180. |
 | `ORRERY_URL` | The hub's machine surface. |
 | `ORRERY_TOKEN` | A source token, registered for the blueprints above, with a delete grant on `sw_deployment` so it can remove its copy of a job another source reports. |
-| `ORRERY_READ_TOKEN` | An access token that may read: Argo CD syncs, apps, workloads, incidents, and, when an `ARGOCD_SERVICES` link names a service no watched repository holds, services. |
+| `ORRERY_READ_TOKEN` | An access token that may read: Argo CD syncs, apps, workloads, incidents, and, when an `ARGOCD_SERVICES` link names a service no watched repository holds, services; with the door open, the `sw_checkout` blueprint, machines, and people. |
+| `TENDER_AUDIENCE` | Muster's own origin as machines call it, such as `https://muster.example.com`. With `DEVICE_CA_FILE`, opens the device door; neither set, it stays shut. |
+| `DEVICE_CA_FILE` | A PEM file of the estate's device authority: the root, or roots, a device certificate must chain to. |
+| `DEVICE_ID_FROM`, `DEVICE_PERSON_FROM` | Where the door reads the device and its person from the certificate, as platformkit's `device` package names them: `cn`, `email`, `upn`, `dns`, `uri`, or `uri:<scheme>`, comma separated, the first present winning. Default `cn`, and `email,upn`. |
+| `TENDER_EVERY_MINUTES` | How often a machine is asked to report, 15. |
+| `MACHINE_BLUEPRINT`, `MACHINE_MATCH_FIELD` | Where a checkout's machine is found: the blueprint, `it_workstation`, and the field that names the device, `hostname`. An empty blueprint links no machine. |
+| `PERSON_BLUEPRINT`, `PERSON_MATCH_FIELD` | Where a checkout's owner is found: the blueprint, `person`, and the field holding the device's person, `emails`. An empty blueprint links no owner. |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME` | OTLP traces and metrics; off when unset. |
 | `LOG_LEVEL` | `debug`, `info`, `warn`, or `error`. |
 | `GITHUB_APP_ID`, `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_WEBHOOK_SECRET` | The GitHub App. |
@@ -323,6 +408,8 @@ muster serve
 - `GET /healthz` answers at once; it never waits on a sweep.
 - `POST /api/webhooks/github`, checked by its HMAC signature.
 - `POST /api/webhooks/gitlab`, checked by its secret token.
+- `GET` and `POST /tender/v1/readers/muster`, with the door open, checked by
+  the device door.
 
 A webhook reads its repository again ahead of the sweep and writes it.
 Azure DevOps sends none; the sweep covers it, and reads GitLab's and Azure
@@ -369,6 +456,8 @@ sweep, per repository read, and per outbound call, and these metrics:
 - `muster.webhook.lag`, from a delivery to its repository written
 - `muster.webhooks` by provider and outcome
 - `muster.push.entities` by blueprint and outcome
+- `muster.device.reports`, the posts machines made, by outcome: `kept`,
+  `late` (a newer one was already kept), `invalid`, or `version`
 - `muster.sweep.last_success`, the time of the last sweep that reached every forge
 - `muster.actions.jobs` (finished), `muster.actions.job.wait` (queued
   to a runner taking it), and `muster.actions.job.duration` (on the
@@ -393,7 +482,7 @@ sweep, per repository read, and per outbound call, and these metrics:
 
 ## Upgrade notes
 
-### From redgreen 2.x to Muster 3.0
+### From redgreen 2.x to Muster 3
 
 redgreen is Muster now. The program does the same work under the new name;
 nothing it writes changed shape. An estate changes these, in this order:
@@ -414,7 +503,7 @@ nothing it writes changed shape. An estate changes these, in this order:
 4. **Catalog source.** Register a pusher source named `muster` for the same
    blueprints as `redgreen` (`sw_repository`, `sw_pipeline`, `sw_service`,
    `sw_api`, `sw_connection`, `sw_deployment` with its delete grant,
-   `sw_issue`, `team`), issue it a token, and give that token to Muster as
+   `sw_issue`, `team`) and the new `sw_checkout`, issue it a token, and give that token to Muster as
    `ORRERY_TOKEN`. Then hand the old source's entities over before Muster's
    first run, so it writes on top of them and its next run keeps or deletes
    them as its own. Without a `scope`, each entity keeps its scope: the

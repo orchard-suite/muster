@@ -153,6 +153,19 @@ expect('dora over 15% is low', service(share(4, 20)), { dora_change_failure_band
 expect('dora restore under an hour', service([deploy(1, { status: 'failed', failed_change: true, restore_hours: 0.5 })]), { dora_restore_band: 'elite' })
 expect('dora team', compute('team', {}, elite), { dora_grade: 'elite' })
 
+// Checkouts: unseen work and the device certificate, then the count on the repository.
+const ahead = (days: number) => new Date(Date.now() + days * DAY + 3_600_000).toISOString()
+const checkout = (f: Record<string, unknown>) => compute('sw_checkout', { staged: 0, modified: 0, untracked: 0, conflicted: 0, unpushed_commits: 0, device_certificate_expires: ahead(90), ...f })
+expect('checkout clean', checkout({}), { changed_files: 0, unseen_work: false, device_certificate_days_left: 90, status: 'green', status_reason: null })
+expect('checkout dirty', checkout({ modified: 2, untracked: 1 }), { changed_files: 3, unseen_work: true })
+expect('checkout unpushed', checkout({ unpushed_commits: 4 }), { changed_files: 0, unseen_work: true })
+expect('checkout certificate running out', checkout({ device_certificate_expires: ahead(5) }), { status: 'amber', status_reason: 'the device certificate runs out in 5 days' })
+expect('checkout certificate ran out', checkout({ device_certificate_expires: ago(3) }), { status: 'red', status_reason: 'the device certificate ran out 3 days ago, so the machine no longer reports' })
+expect('checkout no certificate', checkout({ device_certificate_expires: null }), { status: 'grey' })
+const held = (unseen: boolean) => entity({ unseen_work: unseen })
+expect('repo machines with unseen work', repo({}, [piped('green'), held(true), held(false), held(true)]), { machines_with_unseen_work: 2 })
+expect('repo no machines', repo({}), { machines_with_unseen_work: 0 })
+
 console.log(`evaluated: ${cases} cases`)
 if (failures > 0) {
   console.error(`${failures} failure(s)`)

@@ -235,6 +235,7 @@ func RepositoryBlueprint() sdk.Blueprint {
 			f("pipeline_red_reason", typed("string", "description", "Why one of its red pipelines is red.", "aggregation", agg(fromPipelines, "max", "status_reason", eq("status", "red"), nil, ""))),
 			f("pipeline_amber_reason", typed("string", "description", "Why one of its amber pipelines is amber.", "aggregation", agg(fromPipelines, "max", "status_reason", eq("status", "amber"), nil, ""))),
 			f("open_alerts", typed("number", "title", "Total open alerts", "calculation", openAlerts)),
+			f("machines_with_unseen_work", typed("number", "title", "Machines with unseen work", "description", "Machines whose checkout of it holds commits no remote has, or files not committed, by their last reports.", "aggregation", agg(fromCheckouts, "count", "", eq("unseen_work", true), nil, ""))),
 		}, severities(RepositoryRules), repositoryRules(), status(repositoryStatus, repositoryReason)),
 		"relations": map[string]any{},
 	}
@@ -432,7 +433,14 @@ func IssueBlueprint() sdk.Blueprint {
 	}
 }
 
-// Blueprints are offered in this order; the hub accepts relations in any order.
+// Core is offered in one call, in this order; the hub accepts relations in
+// any order. Each blueprint here is Muster's own, so the hub takes it whole.
+func Core() []sdk.Blueprint {
+	return []sdk.Blueprint{RepositoryBlueprint(), PipelineBlueprint(), ServiceBlueprint(), APIBlueprint(), DeploymentBlueprint(), IssueBlueprint(), ConnectionBlueprint(), CheckoutBlueprint()}
+}
+
+// Blueprints are every definition Muster writes fields of: the core, then
+// the team's DORA fields, which are offered on their own.
 func Blueprints() []sdk.Blueprint {
-	return []sdk.Blueprint{RepositoryBlueprint(), PipelineBlueprint(), ServiceBlueprint(), APIBlueprint(), DeploymentBlueprint(), IssueBlueprint(), ConnectionBlueprint(), TeamDORA()}
+	return append(Core(), TeamDORA())
 }

@@ -44,6 +44,25 @@ type Config struct {
 	OrreryToken     string
 	OrreryReadToken string
 
+	// The device door Tender posts through. It is off unless both
+	// TenderAudience, Muster's own origin as devices call it, and
+	// DeviceCAFile, the estate's device authority as PEM, are set.
+	TenderAudience string
+	DeviceCAFile   string
+	// DeviceIDFrom and DevicePersonFrom say where the door reads the device
+	// and its person from the certificate; empty takes the door's defaults.
+	DeviceIDFrom     string
+	DevicePersonFrom string
+	// TenderEvery is how often a device is asked to report.
+	TenderEvery time.Duration
+	// A checkout links to the machine whose MachineMatch field, on the
+	// MachineBlueprint, names its device, and to the person whose
+	// PersonMatch field, on the PersonBlueprint, holds the device's person.
+	MachineBlueprint string
+	MachineMatch     string
+	PersonBlueprint  string
+	PersonMatch      string
+
 	OtelEndpoint string
 	OtelService  string
 
@@ -139,6 +158,16 @@ func Parse(get func(string) string) (Config, error) {
 		OrreryToken:     str("ORRERY_TOKEN", ""),
 		OrreryReadToken: str("ORRERY_READ_TOKEN", ""),
 
+		TenderAudience:   link("TENDER_AUDIENCE", ""),
+		DeviceCAFile:     str("DEVICE_CA_FILE", ""),
+		DeviceIDFrom:     str("DEVICE_ID_FROM", ""),
+		DevicePersonFrom: str("DEVICE_PERSON_FROM", ""),
+		TenderEvery:      time.Duration(num("TENDER_EVERY_MINUTES", 15)) * time.Minute,
+		MachineBlueprint: str("MACHINE_BLUEPRINT", "it_workstation"),
+		MachineMatch:     str("MACHINE_MATCH_FIELD", "hostname"),
+		PersonBlueprint:  str("PERSON_BLUEPRINT", "person"),
+		PersonMatch:      str("PERSON_MATCH_FIELD", "emails"),
+
 		OtelEndpoint: link("OTEL_EXPORTER_OTLP_ENDPOINT", ""),
 		OtelService:  str("OTEL_SERVICE_NAME", ""),
 
@@ -169,6 +198,9 @@ func Parse(get func(string) string) (Config, error) {
 	}
 	if c.AzureClientSecret != "" && len(c.AzureOrganizations) == 0 {
 		errs = append(errs, errors.New("AZURE_DEVOPS_ORGANIZATIONS: required with the Azure DevOps service principal"))
+	}
+	if (c.TenderAudience == "") != (c.DeviceCAFile == "") {
+		errs = append(errs, errors.New("TENDER_AUDIENCE and DEVICE_CA_FILE: set both to open the device door, or neither"))
 	}
 	if err := errors.Join(errs...); err != nil {
 		return Config{}, fmt.Errorf("invalid configuration: %w", err)

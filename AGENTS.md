@@ -1,6 +1,7 @@
 # Muster
 
-The forges' door into Orrery. Read `README.md` first.
+Where the code is and what state it is in: the forges' door into Orrery,
+and the door a machine's own report comes in by. Read `README.md` first.
 
 This repository is public and estate-neutral. Every name in a test, an
 example, or a doc comes from the fixture world:
@@ -75,6 +76,13 @@ https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
   each service and keep host and database names only; no value ever leaves
   them.
   `internal/telemetry` is logs, traces, and metrics.
+- `internal/tender` is the two calls Tender makes, behind platformkit's
+  `device` door, the only part of platformkit Muster takes. It holds a post
+  to the reader's report version 1, refusing any field version 1 lacks, and
+  keeps it whole in `internal/state` in place of the device's last one.
+  `internal/machines` is what is kept of a device and its report.
+  `internal/sync/checkouts.go` writes each device's checkouts as a snapshot
+  in its own scope, and `internal/catalog/checkouts.go` shapes them.
 
 ## Rules
 
@@ -98,6 +106,10 @@ https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
 - A service is written with what the files say: its folder, kind, language,
   README, Dockerfile, tests, and icon. What people decide about it is never
   pushed; a pushed value would fight their edits.
+- Never write a checkout while `sw_checkout` has no access rule on the hub,
+  or while Muster cannot read whether it has one. A hub drops a rule a
+  source offers, so the estate sets it; until then the reports wait in the
+  state.
 - `VERSION` is the version of record.
 - `reader/` is a module of its own (`github.com/orchard-suite/muster/reader`)
   that Tender imports: the standard library only, and `git` on the path. Its

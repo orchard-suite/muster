@@ -81,3 +81,26 @@ func TestArgoServicesRefuseAPairTheyCannotRead(t *testing.T) {
 		}
 	}
 }
+
+func TestTheDeviceDoorIsOffUntilBothHalvesAreSet(t *testing.T) {
+	c, err := Parse(env(nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.TenderAudience != "" || c.DeviceCAFile != "" || c.TenderEvery.Minutes() != 15 {
+		t.Fatalf("defaults: %+v", c)
+	}
+	if c.MachineBlueprint != "it_workstation" || c.MachineMatch != "hostname" || c.PersonBlueprint != "person" || c.PersonMatch != "emails" {
+		t.Fatalf("link defaults: %+v", c)
+	}
+	if _, err := Parse(env(map[string]string{"TENDER_AUDIENCE": "https://muster.example.com"})); err == nil || !strings.Contains(err.Error(), "DEVICE_CA_FILE") {
+		t.Fatalf("an address without an authority: %v", err)
+	}
+	if _, err := Parse(env(map[string]string{"DEVICE_CA_FILE": "/etc/devices/ca.pem"})); err == nil {
+		t.Fatal("an authority without an address was taken")
+	}
+	c, err = Parse(env(map[string]string{"TENDER_AUDIENCE": "https://muster.example.com/", "DEVICE_CA_FILE": "/etc/devices/ca.pem", "TENDER_EVERY_MINUTES": "30"}))
+	if err != nil || c.TenderAudience != "https://muster.example.com" || c.TenderEvery.Minutes() != 30 {
+		t.Fatalf("both set: %+v, %v", c, err)
+	}
+}

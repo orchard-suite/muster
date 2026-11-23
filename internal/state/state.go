@@ -2,8 +2,8 @@
 // ETag and the normalised facts read from that answer, never the raw body;
 // webhook delivery ids; the run, deployment, and issue facts that outlive one
 // forge answer, with the files each deployed range changed; and what was last
-// written to Orrery. Losing the file costs
-// one full sweep.
+// written to Orrery; and each device's last report. Losing the file costs
+// one full sweep, and each device's report until its next post.
 package state
 
 import (
@@ -79,6 +79,13 @@ CREATE TABLE IF NOT EXISTS written (
 );
 -- A service's place travels on the service, so no hash of it is kept.
 DELETE FROM written WHERE blueprint = 'placement';
+CREATE TABLE IF NOT EXISTS reports (
+  device TEXT NOT NULL,
+  reader TEXT NOT NULL,
+  at TEXT NOT NULL,
+  facts TEXT NOT NULL,
+  PRIMARY KEY (device, reader)
+);
 CREATE TABLE IF NOT EXISTS settings (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL
@@ -112,6 +119,10 @@ func Open(path string) (*Store, error) {
 func (s *Store) Close() error { return s.db.Close() }
 
 func stamp(t time.Time) string { return t.UTC().Format(time.RFC3339Nano) }
+
+// fixedStamp is a time whose text sorts as the time does, for a column
+// compared in SQL.
+const fixedStamp = "2006-01-02T15:04:05.000000000Z"
 
 // Response is what one conditional request left behind.
 type Response struct {
@@ -367,6 +378,44 @@ func (s *Store) PutSetting(ctx context.Context, key string, v any) error {
 	}
 	_, err = s.db.ExecContext(ctx, `INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value`, key, string(b))
 	return err
+}
+
+// PutReport keeps a device's whole report for a reader in place of the one
+// before it, unless the one kept was read later than at: a post that arrives
+// late never undoes a newer one. kept says whether facts were kept, and a
+// post sent twice is kept once.
+func (s *Store) PutReport(ctx context.Context, device, reader string, at time.Time, facts any) (kept bool, err error) {
+	b, err := json.Marshal(facts)
+	if err != nil {
+		return false, err
+	}
+	res, err := s.db.ExecContext(ctx, `INSERT INTO reports (device, reader, at, facts) VALUES (?, ?, ?, ?)
+		ON CONFLICT(device, reader) DO UPDATE SET at = excluded.at, facts = excluded.facts WHERE excluded.at >= reports.at`,
+		device, reader, at.UTC().Format(fixedStamp), string(b))
+	if err != nil {
+		return false, err
+	}
+	n, err := res.RowsAffected()
+	return n > 0, err
+}
+
+// Reports decodes every device's last report for a reader, by device.
+func Reports[T any](ctx context.Context, s *Store, reader string) ([]T, error) {
+	return decodeAll[T](ctx, s, `SELECT facts FROM reports WHERE reader = ? ORDER BY device`, reader)
+}
+
+// Report decodes one device's last report for a reader into v and says
+// whether there was one.
+func (s *Store) Report(ctx context.Context, device, reader string, v any) (bool, error) {
+	var raw string
+	err := s.db.QueryRowContext(ctx, `SELECT facts FROM reports WHERE device = ? AND reader = ?`, device, reader).Scan(&raw)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, json.Unmarshal([]byte(raw), v)
 }
 
 // Pruned counts what Prune removed, by table.

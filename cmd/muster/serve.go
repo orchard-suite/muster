@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -25,7 +28,9 @@ import (
 	"github.com/orchard-suite/muster/internal/state"
 	msync "github.com/orchard-suite/muster/internal/sync"
 	"github.com/orchard-suite/muster/internal/telemetry"
+	"github.com/orchard-suite/muster/internal/tender"
 	"github.com/orchard-suite/orrery/v2/sdk"
+	"github.com/orchard-suite/platformkit/v3/device"
 )
 
 // webhookLimit is the largest webhook body read.
@@ -95,7 +100,8 @@ func serve() error {
 	}
 	engine := msync.New(msync.Options{Providers: providers, Store: store, Push: push, Read: reader, Tel: tel, Log: base.With("component", "sync"),
 		Bots: services.Bots{Extra: cfg.BotAuthors}, Probe: cfg.ProbePaths, Interval: cfg.SyncInterval, Concurrency: cfg.Concurrency, GitLabHost: gitlabHost, ComponentFields: cfg.ComponentFields, ArgoServices: cfg.ArgoServices,
-		Flaky: catalog.FlakyRule{Window: cfg.FlakyWindowRuns, Clear: cfg.FlakyClearRuns, MaxAge: time.Duration(cfg.FlakyMaxAgeDays) * 24 * time.Hour}})
+		Flaky:     catalog.FlakyRule{Window: cfg.FlakyWindowRuns, Clear: cfg.FlakyClearRuns, MaxAge: time.Duration(cfg.FlakyMaxAgeDays) * 24 * time.Hour},
+		Checkouts: msync.CheckoutOptions{MachineBlueprint: cfg.MachineBlueprint, MachineMatch: cfg.MachineMatch, PersonBlueprint: cfg.PersonBlueprint, PersonMatch: cfg.PersonMatch}})
 	go engine.Run(ctx)
 
 	mux := http.NewServeMux()
@@ -128,6 +134,16 @@ func serve() error {
 			_, _ = w.Write([]byte("OK"))
 		})))
 	}
+	if cfg.TenderAudience == "" {
+		log.Info("device door off: TENDER_AUDIENCE and DEVICE_CA_FILE are not set; no machine reports are taken")
+	} else {
+		door, err := openDoor(cfg, base.With("component", "door"))
+		if err != nil {
+			return err
+		}
+		tender.Routes(mux, door, tender.Options{Store: store, Every: cfg.TenderEvery, Kept: engine.WriteDevice, Tel: tel, Log: base.With("component", "tender")})
+		log.Info("device door open", "audience", cfg.TenderAudience, "path", tender.Path, "every", cfg.TenderEvery.String())
+	}
 	server := &http.Server{Addr: ":" + strconv.Itoa(cfg.Port), Handler: mux, ReadHeaderTimeout: 10 * time.Second}
 	go func() {
 		<-ctx.Done()
@@ -142,4 +158,23 @@ func serve() error {
 		return err
 	}
 	return nil
+}
+
+// openDoor makes the device door from the estate's device authority.
+func openDoor(cfg config.Config, log *slog.Logger) (*device.Door, error) {
+	pem, err := os.ReadFile(cfg.DeviceCAFile)
+	if err != nil {
+		return nil, fmt.Errorf("DEVICE_CA_FILE: %w", err)
+	}
+	roots := x509.NewCertPool()
+	if !roots.AppendCertsFromPEM(pem) {
+		return nil, fmt.Errorf("DEVICE_CA_FILE: %s holds no PEM certificate", cfg.DeviceCAFile)
+	}
+	return device.New(device.Config{
+		Audience:   cfg.TenderAudience,
+		Roots:      roots,
+		DeviceFrom: cfg.DeviceIDFrom,
+		PersonFrom: cfg.DevicePersonFrom,
+		HTTP:       &http.Client{Timeout: 10 * time.Second, Transport: telemetry.Transport(nil)},
+	}, log)
 }

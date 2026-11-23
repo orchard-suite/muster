@@ -50,6 +50,7 @@ type Telemetry struct {
 	webhookLag   metric.Float64Histogram
 	webhooks     metric.Int64Counter
 	pushes       metric.Int64Counter
+	reports      metric.Int64Counter
 	requests     metric.Float64Histogram
 	jobs         metric.Int64Counter
 	jobWait      metric.Float64Histogram
@@ -101,6 +102,8 @@ func Setup(ctx context.Context, endpoint, service, version string, log *slog.Log
 	t.webhooks, err = m.Int64Counter(Service+".webhooks", metric.WithDescription("Webhook deliveries, by provider and outcome."))
 	keep(err)
 	t.pushes, err = m.Int64Counter(Service+".push.entities", metric.WithDescription("Entities written to Orrery, by blueprint and outcome."))
+	keep(err)
+	t.reports, err = m.Int64Counter(Service+".device.reports", metric.WithDescription("Reports devices posted through the door, by outcome."))
 	keep(err)
 	// A job waits seconds for a runner on a good day and an hour on a bad
 	// one, and runs from seconds to hours.
@@ -237,6 +240,12 @@ func (t *Telemetry) WebhookLag(ctx context.Context, provider string, lag time.Du
 }
 
 // Pushed counts entities written to Orrery: accepted, rejected, or failed.
+// DeviceReport counts one post a device made: kept, late (a newer one was
+// already kept), invalid, or another version.
+func (t *Telemetry) DeviceReport(ctx context.Context, outcome string) {
+	t.reports.Add(ctx, 1, metric.WithAttributes(attribute.String("outcome", outcome)))
+}
+
 func (t *Telemetry) Pushed(ctx context.Context, blueprint, outcome string, n int) {
 	if n == 0 {
 		return

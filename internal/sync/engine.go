@@ -51,6 +51,8 @@ type Options struct {
 	// or name, or from the source its manifests are read from, to the
 	// service it deploys.
 	ArgoServices map[string]string
+	// Checkouts says what a device's checkouts link to.
+	Checkouts CheckoutOptions
 }
 
 // tracked is one repository as the last read left it.
@@ -92,7 +94,7 @@ func New(o Options) *Engine {
 		o.Concurrency = 1
 	}
 	e := &Engine{
-		o: o, jobsInFlight: cijobs.Since(time.Now()), offer: &offer{client: o.Push, log: o.Log},
+		o: o, jobsInFlight: cijobs.Since(time.Now()), offer: newOffer(o.Push, o.Log, o.Checkouts),
 		jobs: make(chan job, 1024), urgent: make(chan job, 256), again: make(chan struct{}, 1),
 		repos: map[string]*tracked{}, byName: map[string]string{}, debounce: map[string]*time.Timer{}, delivered: map[string]time.Time{},
 	}
@@ -197,6 +199,7 @@ func (e *Engine) Sweep(ctx context.Context, reason string) {
 		e.pushAccount(ctx, accounts[id], keys)
 	}
 	e.pushOutcomes(ctx)
+	e.pushCheckouts(ctx)
 	if pruned, err := e.o.Store.Prune(ctx, time.Now()); err != nil {
 		e.o.Log.WarnContext(ctx, "state prune failed", "error", err)
 	} else {

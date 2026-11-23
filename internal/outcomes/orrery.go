@@ -341,3 +341,36 @@ func (r Reader) Services(ctx context.Context) ([]HubService, error) {
 	}
 	return list, nil
 }
+
+// HubRecord is any entity read for its key and a few fields.
+type HubRecord struct {
+	Key    string         `json:"key"`
+	Fields map[string]any `json:"fields"`
+}
+
+// Records reads every entity of a blueprint with the fields named.
+func (r Reader) Records(ctx context.Context, blueprint string, fields ...string) ([]HubRecord, error) {
+	return Entities[HubRecord](ctx, r, Ask{Blueprint: blueprint, Fields: fields})
+}
+
+// Restricted says whether the hub gives a blueprint an access rule, so only
+// the people the rule lets in read its entities. An access token sees the
+// rule; a blueprint the hub does not have is not restricted.
+func (r Reader) Restricted(ctx context.Context, blueprint string) (bool, error) {
+	type definition struct {
+		Access json.RawMessage `json:"access"`
+	}
+	address := r.URL + "/v1/blueprints/" + url.PathEscape(blueprint)
+	var def definition
+	var err error
+	if r.Fetch.Store == nil {
+		def, err = provider.Once(ctx, r.Fetch, address, provider.JSON[definition])
+	} else {
+		def, err = provider.Get(ctx, r.Fetch, address, provider.JSON[definition])
+	}
+	if err != nil {
+		return false, err
+	}
+	a := strings.TrimSpace(string(def.Access))
+	return a != "" && a != "null", nil
+}

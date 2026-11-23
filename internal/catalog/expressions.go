@@ -97,6 +97,15 @@ var (
 	doraGrade             = "dora_frequency_band == null ? null : contains(" + bands + ", 'low') ? 'low' : contains(" + bands + ", 'medium') ? 'medium' : contains(" + bands + ", 'high') ? 'high' : 'elite'"
 )
 
+// Checkout calculations, in order.
+var (
+	changedFiles    = "coalesce(staged, 0) + coalesce(modified, 0) + coalesce(untracked, 0) + coalesce(conflicted, 0)"
+	unseenWork      = "coalesce(unpushed_commits, 0) > 0 || changed_files > 0"
+	certificateLeft = "days_until(device_certificate_expires)"
+	checkoutStatus  = "device_certificate_days_left == null ? 'grey' : device_certificate_days_left < 0 ? 'red' : device_certificate_days_left <= 14 ? 'amber' : 'green'"
+	checkoutReason  = "status == 'red' ? 'the device certificate ran out ' + (0 - device_certificate_days_left) + ' days ago, so the machine no longer reports' : status == 'amber' ? 'the device certificate runs out in ' + device_certificate_days_left + ' days' : status == 'grey' ? 'no device certificate known' : null"
+)
+
 // Calculation is one calculated field, named by blueprint and field.
 type Calculation struct {
 	Blueprint, Field, Source string

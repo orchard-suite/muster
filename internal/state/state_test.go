@@ -102,3 +102,37 @@ func TestWrittenAndSettings(t *testing.T) {
 		t.Fatalf("setting = %+v", v)
 	}
 }
+
+func TestAReportReplacesTheDevicesLastOneWhole(t *testing.T) {
+	ctx := context.Background()
+	s := open(t)
+	type facts struct{ Checkouts []string }
+	at := time.Date(2026, 11, 23, 14, 0, 0, 0, time.UTC)
+	if kept, err := s.PutReport(ctx, "device-1", "muster", at, facts{[]string{"a", "b"}}); err != nil || !kept {
+		t.Fatalf("first report: %v %v", kept, err)
+	}
+	if kept, _ := s.PutReport(ctx, "device-1", "muster", at.Add(500*time.Millisecond), facts{[]string{"c"}}); !kept {
+		t.Fatal("a newer report was not kept")
+	}
+	// Sent twice, it is stored once; sent late, it never undoes the newer one.
+	if kept, _ := s.PutReport(ctx, "device-1", "muster", at.Add(500*time.Millisecond), facts{[]string{"c"}}); !kept {
+		t.Fatal("the same report sent again was refused")
+	}
+	if kept, _ := s.PutReport(ctx, "device-1", "muster", at, facts{[]string{"old"}}); kept {
+		t.Fatal("an older report replaced a newer one")
+	}
+	_, _ = s.PutReport(ctx, "device-2", "muster", at, facts{nil})
+	_, _ = s.PutReport(ctx, "device-1", "other", at, facts{[]string{"x"}})
+
+	var got facts
+	if ok, err := s.Report(ctx, "device-1", "muster", &got); !ok || err != nil || len(got.Checkouts) != 1 || got.Checkouts[0] != "c" {
+		t.Fatalf("kept %+v %v %v; the whole report is replaced", got, ok, err)
+	}
+	all, err := Reports[facts](ctx, s, "muster")
+	if err != nil || len(all) != 2 {
+		t.Fatalf("reports %+v %v", all, err)
+	}
+	if ok, _ := s.Report(ctx, "device-3", "muster", &got); ok {
+		t.Fatal("a device that never posted has a report")
+	}
+}
