@@ -24,6 +24,7 @@ check:
 	go run ./scripts/blueprints > blueprints.check.json
 	node scripts/check-expressions.mts blueprints.check.json $(ORRERY)
 
-# Run the check, then land the commits on main.
-land: check
+# Land the commits on main: release-damnit runs the config's check on the
+# tree that lands and signs its proof.
+land:
 	release-damnit land $(BRANCH)

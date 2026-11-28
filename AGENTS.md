@@ -124,8 +124,9 @@ https://github.com/orchard-suite/hedge/blob/main/docs/fixtures.md.
 ## Delivery
 
 Agents push to main and land with `make land` (`make land BRANCH=<branch>`
-from a worktree): it runs `make check`, then `release-damnit land`. CI runs
-the same check on every pull request and before every release, then
+from a worktree): `release-damnit land` runs the config's check, `make
+check`, on the tree that lands and signs a landing proof the release
+verifies. CI runs the same check on every pull request and before every release, then
 versions every `feat` and `fix` since each package's last release tag, tags
 it, and builds the service's image from its bare `v<version>` tag, `ghcr.io/orchard-suite/muster:<version>` for
 `linux/amd64`, signed with cosign. Never edit `VERSION`, the manifest, or
@@ -143,4 +144,5 @@ and the expression check, which proves
 every calculation with Orrery's own code. That last step needs an Orrery
 checkout with its dependencies installed, `../orrery` by default
 (`make check ORRERY=<path>` for another). CI checks out the Orrery commit
-`go.mod` requires. Run it before every commit; `make land` runs it again.
+`go.mod` requires. Run it before every commit; `make land` runs it again and
+signs its proof.
